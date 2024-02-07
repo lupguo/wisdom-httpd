@@ -47,7 +47,7 @@ func ParseConfig(filename string) (cfg *ServerConfig, err error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "read filename fail: %v", filename)
 	}
-	err = yaml.Unmarshal(data, cfg)
+	err = yaml.Unmarshal(data, &cfg)
 	if err != nil {
 		return nil, errors.Wrapf(err, "yaml unmarshal config fail")
 	}
@@ -103,16 +103,16 @@ func GetAssetPath() string {
 	return RootPath(appConfig.Assets.AssetPath)
 }
 
-// GetSpecialViewPath 视图地址, assets/views/path
-func GetSpecialViewPath(path string) string {
-	return RootPath(appConfig.Assets.AssetPath, path)
+// GetViewTmplPath 视图地址, assets/views/path
+func GetViewTmplPath(path string) string {
+	return RootPath(appConfig.Assets.ViewPath, path)
 }
 
 // GetSpecialViewPathList 获取一批path地址
 func GetSpecialViewPathList(paths ...string) []string {
 	var ret []string
 	for _, path := range paths {
-		ret = append(ret, GetSpecialViewPath(path))
+		ret = append(ret, GetViewTmplPath(path))
 	}
 	return ret
 }

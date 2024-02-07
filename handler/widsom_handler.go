@@ -7,11 +7,11 @@ import (
 	"os"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
+	"github.com/lupguo/wisdom-httpd/config"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
-
-var wisdomJsonFile string
 
 // WisdomHandler 名言处理
 func WisdomHandler(c echo.Context) error {
@@ -68,9 +68,9 @@ type Wisdom struct {
 
 func generateOneRandWisdom() (*Wisdom, error) {
 	// 解析wisdoms
-	wisdoms, err := ParseJsonWisdom(wisdomJsonFile)
+	wisdoms, err := ParseJsonWisdom(config.GetWisdomFilename())
 	if err != nil {
-		logrus.Debugf("generate wisdom got err: %v", err)
+		log.Debugf("generate wisdom got err: %v", err)
 		return nil, errors.Wrap(err, "wisdom handler got err")
 	}
 	if len(wisdoms) < 0 {

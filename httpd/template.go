@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 	"github.com/lupguo/wisdom-httpd/config"
 )
 
@@ -19,7 +20,7 @@ func GetRenderTemplate() *WisdomTemplate {
 	// 创建模板对象并注册自定义模板函数
 	tpl := template.New("index.tmpl").Funcs(template.FuncMap{
 		"include": func(filename string, data interface{}) (template.HTML, error) {
-			tmpl, err := template.ParseFiles(config.GetSpecialViewPath(filename))
+			tmpl, err := template.ParseFiles(config.GetViewTmplPath(filename))
 			if err != nil {
 				return "", err
 			}
@@ -31,10 +32,21 @@ func GetRenderTemplate() *WisdomTemplate {
 			return template.HTML(result.String()), nil
 		},
 	})
+
 	// 解析模板文件
-	tpl = template.Must(tpl.ParseFiles(config.GetSpecialViewPathList("index.tmpl", "wisdom.tmpl")...))
-	tpl = template.Must(tpl.ParseGlob(config.GetSpecialViewPath("main/*.tmpl")))
-	tpl = template.Must(tpl.ParseGlob(config.GetSpecialViewPath("partial/*.tmpl")))
+	indexViews := config.GetSpecialViewPathList("index.tmpl", "wisdom.tmpl")
+	log.Infof("index view files: %v", indexViews)
+
+	mainViews := config.GetViewTmplPath("main/*.tmpl")
+	log.Infof("main view files: %v", mainViews)
+
+	partialViews := config.GetViewTmplPath("partial/*.tmpl")
+	log.Infof("partial view files: %v", partialViews)
+
+	// 模版渲染
+	tpl = template.Must(tpl.ParseFiles(indexViews...))
+	tpl = template.Must(tpl.ParseGlob(mainViews))
+	tpl = template.Must(tpl.ParseGlob(partialViews))
 	tplRender := &WisdomTemplate{
 		templates: tpl,
 	}
