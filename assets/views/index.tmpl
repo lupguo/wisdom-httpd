@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/css/index.css">
+    <script type="application/javascript" src="/js/index.js"></script>
+    <title>Wisdom</title>
+</head>
+<body>
+<div class="container">
+
+    <!-- 导航栏内容 -->
+    <div class="header">
+        {{include "main/header.tmpl" .}}
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="content">
+        {{if .Error }}
+            {{include "partial/error.tmpl" .}}
+        {{ else }}
+            {{include "main/content.tmpl" .}}
+        {{ end }}
+    </div>
+
+    <!-- 底部信息 -->
+    <div class="footer">
+        {{include "main/footer.tmpl" .}}
+    </div>
+</div>
+
+</body>
+</html>

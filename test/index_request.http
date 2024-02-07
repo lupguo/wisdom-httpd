@@ -1,0 +1,15 @@
+GET http://{{host}}/wisdom
+Accept: text/html
+
+###
+GET http://{{host}}/wisdom?type=json
+Accept: application/json
+
+###
+# 首页
+GET http://{{host}}
+Accept: application/json
+
+###
+
+
