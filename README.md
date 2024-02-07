@@ -2,6 +2,58 @@
 
 wisdom-httpd是一个提供人生至理名言、冥想开悟的小工具，激励我们在人生苦短的时代，无论遇到什么挫折，都应该积极、努力的追求人生的价值和意义！
 
+## How To
+
+### 服务编译
+
+```shell
+cd /path
+git clone https://github.com/lupguo/wisdom-httpd.git
+go build
+./wisdom-httpd -c ./config.yaml
+```
+
+### 服务启动
+
+root用户配置`wisdom-httpd` systemctl配置
+
+```shell
+vim /etc/systemd/system/wisdom-httpd.service
+...
+# 开机启动服务
+systemctl enable wisdom-httpd.service
+# 服务启动
+systemctl start wisdom-httpd.service
+```
+
+`/etc/systemd/system/wisdom-httpd.service` 内容如下:
+
+```shell
+[Unit]
+Description=wisdom-httpd
+After=network.target
+
+[Service]
+ExecStart=/data/go/bin/wisdom-httpd -c /data/projects/github.com/lupguo/wisdom-httpd/config.yaml
+ExecStop=/bin/kill -SIGINT $MAINPID
+ExecReload=/bin/kill -SIGHUP $MAINPID
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 测试
+
+```shell
+# html 格式，可以用于Notion内嵌
+curl localhost:1666
+
+# json 格式
+curl localhost:1666/wisdom?type=json
+{"sentence":"We dream and we build. We never give up, we never quit. 我们梦想，我们努力，决不放弃，决不退缩"}✔ /data/proje 
+```
+
 ## 灵感
 
 人生苦短，每个人都应该积极探寻生命的价值和意义所在。
@@ -45,7 +97,7 @@ wisdom-httpd是一个提供人生至理名言、冥想开悟的小工具，激�
 为何为会有至理名言，到了一定年龄，经历过一些事情才会有顿悟感觉，才会和当事人有共情。
 
 比如之前听到很多的"时间管理"一词，会浅显认为只要做好计划，按部就班执行就可以达成目标，须不知人的精力是有限的，更重要的是对自己的精力做管理，而非时间管理。
-人的一生也是有限的，有所为有所不为，这样才能更好的过好这一生！ 
+人的一生也是有限的，有所为有所不为，这样才能更好的过好这一生！
 
 我们在日常工作生活中，通常会因为忙于工作，时间悄然而逝去，时常会感慨年龄大了，一年年越来越快的感觉！
 
