@@ -54,6 +54,30 @@ curl localhost:1666/wisdom?type=json
 {"sentence":"We dream and we build. We never give up, we never quit. 我们梦想，我们努力，决不放弃，决不退缩"}✔ /data/proje 
 ```
 
+### Nginx配置
+
+```
+server {
+    listen 80;
+    server_name you-domain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name you-domain.com;
+
+    ssl_certificate /path/to/ssl_certificate.crt;
+    ssl_certificate_key /path/to/ssl_certificate.key;
+
+    location / {
+        proxy_pass http://localhost:1666;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
 ## 灵感
 
 人生苦短，每个人都应该积极探寻生命的价值和意义所在。
