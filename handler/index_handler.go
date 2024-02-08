@@ -23,7 +23,7 @@ type User struct {
 
 // IndexHandler 首页渲染
 func IndexHandler(c echo.Context) error {
-	wisdom, err := generateOneRandWisdom()
+	wisdom, err := generateOneRandWisdom(false)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "error.tmpl", err.Error())
 	}

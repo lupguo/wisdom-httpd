@@ -5,19 +5,26 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"github.com/lupguo/wisdom-httpd/config"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 // WisdomHandler 名言处理
 func WisdomHandler(c echo.Context) error {
 	// 随机一条wisdom
-	wisdom, err := generateOneRandWisdom()
+	preview, err := strconv.ParseBool(c.QueryParam("preview"))
 	if err != nil {
+		log.Errorf("wisdom handler get err, parse query param[preview] got err: %v", err)
+		return err
+	}
+
+	wisdom, err := generateOneRandWisdom(preview)
+	if err != nil {
+		log.Errorf("wisdom handler get err, generateOneRandWisdom got err: %v", err)
 		return c.String(http.StatusOK, err.Error())
 	}
 
@@ -36,26 +43,25 @@ func WisdomHandler(c echo.Context) error {
 	return c.Render(http.StatusOK, "wisdom.tmpl", wisdom)
 }
 
+// WisdomList 配置列表
+type WisdomList struct {
+	Preview []string `json:"preview,omitempty"`
+	Show    []string `json:"show,omitempty"`
+}
+
 // ParseJsonWisdom 从json解析wisdom
-func ParseJsonWisdom(filename string) ([]*Wisdom, error) {
+func ParseJsonWisdom(filename string) (*WisdomList, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, errors.Wrap(err, "read file `wisdomHandler.json` got err")
 	}
-	var ws []string
+
+	var ws WisdomList
 	err = json.Unmarshal(data, &ws)
 	if err != nil {
 		return nil, errors.Wrap(err, "unmarshal wisdomHandler json data got err")
 	}
-
-	var wisdoms []*Wisdom
-	for _, w := range ws {
-		wisdoms = append(wisdoms, &Wisdom{
-			Sentence: w,
-		})
-	}
-
-	return wisdoms, nil
+	return &ws, nil
 }
 
 // Wisdom 名言警句
@@ -66,21 +72,35 @@ type Wisdom struct {
 	Img      string `json:"img,omitempty"`      // 图片
 }
 
-func generateOneRandWisdom() (*Wisdom, error) {
-	// 解析wisdoms
-	wisdoms, err := ParseJsonWisdom(config.GetWisdomFilename())
+// 随机生成一条名言警句
+func generateOneRandWisdom(preview bool) (*Wisdom, error) {
+	// 解析wisdoms.json文件
+	jsonCont, err := ParseJsonWisdom(config.GetWisdomFilename())
 	if err != nil {
-		log.Debugf("generate wisdom got err: %v", err)
 		return nil, errors.Wrap(err, "wisdom handler got err")
 	}
-	if len(wisdoms) < 0 {
-		return nil, errors.Wrap(err, "empty wisdom")
+
+	// 从json文件获取指定的内容
+	wisdomStrs := jsonCont.Show
+	if preview == true {
+		wisdomStrs = jsonCont.Preview
+	}
+	if len(wisdomStrs) < 0 {
+		return nil, errors.Errorf("get json content for %v is empty", preview)
 	}
 
-	// 随机一条
-	randIdx := rand.Int31n(int32(len(wisdoms)))
+	// 获取所有的wisdom内容
+	var wisdoms []*Wisdom
+	for _, w := range wisdomStrs {
+		wisdoms = append(wisdoms, &Wisdom{
+			Sentence: w,
+		})
+	}
+
+	// 随机生成一条wisdom内容
+	randIdx := rand.Int31n(int32(len(wisdomStrs)))
 	randWisdom := wisdoms[randIdx]
-	logrus.Debugf("rand wisdom: %v", randWisdom)
+	log.Debugf("rand wisdom: %v", randWisdom)
 
 	return randWisdom, nil
 }

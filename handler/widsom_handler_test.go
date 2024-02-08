@@ -15,3 +15,19 @@ func TestMarshalWisdom(t *testing.T) {
 	s, _ := json.Marshal(w)
 	t.Logf("%s", s)
 }
+
+func TestParseJsonWisdom(t *testing.T) {
+	data := `{
+	"preview": [],
+    "show": [
+        "不积跬步无以至千里，不积小流无以致千里"
+	]}
+`
+
+	var ws WisdomList
+	err := json.Unmarshal([]byte(data), &ws)
+	if err != nil {
+		t.Errorf("can not unmrashal data: %v", err)
+	}
+	t.Logf("%v", data)
+}
