@@ -1,7 +1,12 @@
+### 默认wisdom随机展示
 GET http://{{host}}/wisdom
 Accept: text/html
 
-###
+### 预览
+GET http://{{host}}/wisdom?preview=1
+Accept: application/json
+
+### json响应
 GET http://{{host}}/wisdom?type=json
 Accept: application/json
 

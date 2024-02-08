@@ -14,15 +14,19 @@ import (
 )
 
 // WisdomHandler 名言处理
-func WisdomHandler(c echo.Context) error {
-	// 随机一条wisdom
-	preview, err := strconv.ParseBool(c.QueryParam("preview"))
-	if err != nil {
-		log.Errorf("wisdom handler get err, parse query param[preview] got err: %v", err)
-		return err
+func WisdomHandler(c echo.Context) (err error) {
+	// 预览参数
+	isPreview := false
+	preview := c.QueryParam("preview")
+	if preview != "" {
+		isPreview, err = strconv.ParseBool(preview)
+		if err != nil {
+			log.Errorf("wisdom handler get err, parse query param[preview] got err: %v", err)
+		}
 	}
 
-	wisdom, err := generateOneRandWisdom(preview)
+	// 随机一条wisdom
+	wisdom, err := generateOneRandWisdom(isPreview)
 	if err != nil {
 		log.Errorf("wisdom handler get err, generateOneRandWisdom got err: %v", err)
 		return c.String(http.StatusOK, err.Error())
@@ -73,7 +77,7 @@ type Wisdom struct {
 }
 
 // 随机生成一条名言警句
-func generateOneRandWisdom(preview bool) (*Wisdom, error) {
+func generateOneRandWisdom(isPreview bool) (*Wisdom, error) {
 	// 解析wisdoms.json文件
 	jsonCont, err := ParseJsonWisdom(config.GetWisdomFilename())
 	if err != nil {
@@ -82,11 +86,11 @@ func generateOneRandWisdom(preview bool) (*Wisdom, error) {
 
 	// 从json文件获取指定的内容
 	wisdomStrs := jsonCont.Show
-	if preview == true {
+	if isPreview == true {
 		wisdomStrs = jsonCont.Preview
 	}
-	if len(wisdomStrs) < 0 {
-		return nil, errors.Errorf("get json content for %v is empty", preview)
+	if len(wisdomStrs) <= 0 {
+		return nil, errors.Errorf("get json content for preview[%v] is empty", isPreview)
 	}
 
 	// 获取所有的wisdom内容
@@ -98,7 +102,7 @@ func generateOneRandWisdom(preview bool) (*Wisdom, error) {
 	}
 
 	// 随机生成一条wisdom内容
-	randIdx := rand.Int31n(int32(len(wisdomStrs)))
+	randIdx := rand.Int31n(int32(len(wisdoms)))
 	randWisdom := wisdoms[randIdx]
 	log.Debugf("rand wisdom: %v", randWisdom)
 
