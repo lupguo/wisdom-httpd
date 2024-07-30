@@ -1,4 +1,4 @@
-package handler
+package api
 
 import (
 	"encoding/json"
@@ -25,10 +25,10 @@ func WisdomHandler(c echo.Context) (err error) {
 		}
 	}
 
-	// 随机一条wisdom
-	wisdom, err := generateOneRandWisdom(isPreview)
+	// 获取wisdom
+	wisdom, err := GetAnRandomWisdom(isPreview)
 	if err != nil {
-		log.Errorf("wisdom handler get err, generateOneRandWisdom got err: %v", err)
+		log.Errorf("wisdom handler get err, getAnRandomWisdom got err: %v", err)
 		return c.String(http.StatusOK, err.Error())
 	}
 
@@ -49,8 +49,8 @@ func WisdomHandler(c echo.Context) (err error) {
 
 // WisdomList 配置列表
 type WisdomList struct {
-	Preview []string `json:"preview,omitempty"`
-	Show    []string `json:"show,omitempty"`
+	Preview   []string `json:"preview,omitempty"`
+	Sentences []string `json:"sentences,omitempty"`
 }
 
 // ParseJsonWisdom 从json解析wisdom
@@ -76,28 +76,28 @@ type Wisdom struct {
 	Img      string `json:"img,omitempty"`      // 图片
 }
 
-// 随机生成一条名言警句
-func generateOneRandWisdom(isPreview bool) (*Wisdom, error) {
+// GetAnRandomWisdom Randomly obtain and generate a famous aphorism
+func GetAnRandomWisdom(isPreview bool) (*Wisdom, error) {
 	// 解析wisdoms.json文件
-	jsonCont, err := ParseJsonWisdom(config.GetWisdomFilename())
+	list, err := ParseJsonWisdom(config.GetWisdomFile())
 	if err != nil {
 		return nil, errors.Wrap(err, "wisdom handler got err")
 	}
 
 	// 从json文件获取指定的内容
-	wisdomStrs := jsonCont.Show
+	sentences := list.Sentences
 	if isPreview == true {
-		wisdomStrs = jsonCont.Preview
+		sentences = list.Preview
 	}
-	if len(wisdomStrs) <= 0 {
+	if len(sentences) <= 0 {
 		return nil, errors.Errorf("get json content for preview[%v] is empty", isPreview)
 	}
 
 	// 获取所有的wisdom内容
 	var wisdoms []*Wisdom
-	for _, w := range wisdomStrs {
+	for _, s := range sentences {
 		wisdoms = append(wisdoms, &Wisdom{
-			Sentence: w,
+			Sentence: s,
 		})
 	}
 

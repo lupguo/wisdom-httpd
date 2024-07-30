@@ -5,90 +5,59 @@ import (
 	"os"
 	"strings"
 
-	"github.com/labstack/gommon/log"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
 
-// ServerConfig wisdom-httpd服务配置
-type ServerConfig struct {
-	App    *AppConfig `yaml:"app"`
-	Listen string     `yaml:"listen"` // 监听
-}
-
-// AppConfig 应用配置
-type AppConfig struct {
-	RootPath string `yaml:"root_path"` // 配置文件
-	Log      struct {
+// Config 应用配置
+type Config struct {
+	Listen string `yaml:"listen"` // 监听
+	Log    struct {
 		LogLevel      string `yaml:"log_level"`  // 日志等级(debug, info, error)
 		LogFormat     string `yaml:"log_format"` // 日志格式
 		LogTimeFormat string `yaml:"log_time_format"`
 	} `yaml:"log"`
-	Assets struct {
-		AssetPath string `yaml:"asset_path"` // 静态资源path
-		ViewPath  string `yaml:"view_path"`  // 视图资源path
-	} `yaml:"assets"`
+	Path   *Path `yaml:"view_path"`
 	Wisdom struct {
 		FileType string `yaml:"file_type"` // 后期考虑DB、Http文件
 		FileName string `yaml:"file_name"` // 文件名称（目前默认为本地文件)
 	}
 }
 
-// 服务配置
-var srvConfig *ServerConfig
+// Path 视频配置
+type Path struct {
+	RootPath string `yaml:"root_path"` // 根路径
+	Assets   struct {
+		AssetPath string `yaml:"asset_path"` // 静态资源path
+		ViewPath  string `yaml:"view_path"`  // 视图资源path
+	} `yaml:"assets"`
+}
 
-// 应用配置
-var appConfig *AppConfig
+// 系统默认配置
+var appCfg *Config
 
 // ParseConfig 解析系统配置
-func ParseConfig(filename string) (cfg *ServerConfig, err error) {
+func ParseConfig(filename string) (*Config, error) {
 	// parse
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, errors.Wrapf(err, "read filename fail: %v", filename)
 	}
+	var cfg *Config
 	err = yaml.Unmarshal(data, &cfg)
 	if err != nil {
 		return nil, errors.Wrapf(err, "yaml unmarshal config fail")
 	}
 
-	// default setting
-	if cfg.App == nil {
-		return nil, errors.New("yaml app config error")
-	}
-	appConfig = cfg.App
+	// 设置系统默认值
+	appCfg = cfg
 
 	return cfg, nil
 }
 
 // GetRootPath 返回项目根目录
 func GetRootPath() string {
-	return appConfig.RootPath
-}
-
-// GetLogLevel 日志等级
-func GetLogLevel() log.Lvl {
-	var level log.Lvl
-	strLvl := strings.ToLower(appConfig.Log.LogLevel)
-	switch strLvl {
-	case "debug":
-		level = log.DEBUG
-	case "info":
-		level = log.INFO
-	default:
-		level = log.ERROR
-	}
-	return level
-}
-
-// GetLogFormat 获取应用的日志格式
-func GetLogFormat() string {
-	return appConfig.Log.LogFormat + "\n"
-}
-
-// GetLogTimeFormat 日志时间格式
-func GetLogTimeFormat() string {
-	return appConfig.Log.LogTimeFormat
+	return appCfg.Path.RootPath
 }
 
 // RootPath 返回path=routePath/subPath
@@ -100,24 +69,24 @@ func RootPath(paths ...any) string {
 
 // GetAssetPath 静态资源路径
 func GetAssetPath() string {
-	return RootPath(appConfig.Assets.AssetPath)
+	return RootPath(appCfg.Path.Assets.AssetPath)
 }
 
-// GetViewTmplPath 视图地址, assets/views/path
-func GetViewTmplPath(path string) string {
-	return RootPath(appConfig.Assets.ViewPath, path)
+// GetViewRealPath 视图地址, assets/views/path
+func GetViewRealPath(path string) string {
+	return RootPath(appCfg.Path.Assets.ViewPath, path)
 }
 
-// GetSpecialViewPathList 获取一批path地址
-func GetSpecialViewPathList(paths ...string) []string {
+// GetViewRealPathList 获取视图文件的批path地址
+func GetViewRealPathList(paths ...string) (fullPaths []string) {
 	var ret []string
 	for _, path := range paths {
-		ret = append(ret, GetViewTmplPath(path))
+		ret = append(ret, GetViewRealPath(path))
 	}
 	return ret
 }
 
-// GetWisdomFilename 获取wisdom文件
-func GetWisdomFilename() string {
-	return RootPath(appConfig.Wisdom.FileName)
+// GetWisdomFile 获取wisdom文件
+func GetWisdomFile() string {
+	return RootPath(appCfg.Wisdom.FileName)
 }

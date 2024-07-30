@@ -5,8 +5,17 @@ import (
 )
 
 func TestRootPath(t *testing.T) {
-	appConfig = &AppConfig{
-		RootPath: "/api",
+	appCfg = &Config{
+		Path: &Path{
+			RootPath: "/api",
+			Assets: struct {
+				AssetPath string `yaml:"asset_path"`
+				ViewPath  string `yaml:"view_path"`
+			}(struct {
+				AssetPath string
+				ViewPath  string
+			}{}),
+		},
 	}
 
 	tests := []struct {
