@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lupguo/wisdom-httpd/config"
+	"github.com/pkg/errors"
 )
 
 // WisdomTemplate 实现 echo.Renderer 接口
@@ -15,35 +16,56 @@ type WisdomTemplate struct {
 }
 
 // InitParseWisdomTemplate 初始化Wisdom模板
-func InitParseWisdomTemplate() *WisdomTemplate {
+func InitParseWisdomTemplate() (*WisdomTemplate, error) {
 	// 创建模板对象并注册自定义模板函数
-	tpl := template.New("index.tmpl").Funcs(template.FuncMap{
-		"include": func(filename string, data interface{}) (template.HTML, error) {
-			tmpl, err := template.ParseFiles(config.GetViewRealPath(filename))
-			if err != nil {
-				return "", err
-			}
-			var result bytes.Buffer
-			err = tmpl.ExecuteTemplate(&result, filename, data)
-			if err != nil {
-				return "", err
-			}
-			return template.HTML(result.String()), nil
+	tpl := template.New("wisdom").Funcs(
+		template.FuncMap{
+			"include": func(filename string, data interface{}) (template.HTML, error) {
+				tmpl, err := template.ParseFiles(config.GetViewPathList(filename)...)
+				if err != nil {
+					return "", err
+				}
+				var result bytes.Buffer
+				err = tmpl.ExecuteTemplate(&result, filename, data)
+				if err != nil {
+					return "", err
+				}
+				return template.HTML(result.String()), nil
+			},
 		},
-	})
+	)
 
-	// 解析&渲染模板文件
-	views := []string{
-		"index.tmpl",
-		"wisdom.tmpl",
-		"main/*.tmpl",
-		"partial/*.tmpl",
+	// 解析&渲染全部模板文件
+	views := map[string][]string{
+		"files": {
+			"index.tmpl",
+			"wisdom.tmpl",
+		},
+		"glob": {
+			"main/*.tmpl",
+			"partial/*.tmpl",
+		},
 	}
-	viewRealPaths := config.GetViewRealPathList(views...)
-	tpl = template.Must(tpl.ParseFiles(viewRealPaths...))
+
+	for t, view := range views {
+		viewPaths := config.GetViewPathList(view...)
+		switch t {
+		case "files":
+			if _, err := tpl.ParseFiles(viewPaths...); err != nil {
+				return nil, errors.Wrapf(err, "tpl.ParseFiles[%v] got err", viewPaths)
+			}
+		case "glob":
+			for _, globViewPath := range viewPaths {
+				if _, err := tpl.ParseGlob(globViewPath); err != nil {
+					return nil, errors.Wrapf(err, "tpl.ParseGlob[%v] got err", globViewPath)
+				}
+			}
+		}
+	}
+
 	return &WisdomTemplate{
 		template: tpl,
-	}
+	}, nil
 }
 
 // Render Wisdom渲染模板

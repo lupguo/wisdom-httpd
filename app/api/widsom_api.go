@@ -79,7 +79,7 @@ type Wisdom struct {
 // GetAnRandomWisdom Randomly obtain and generate a famous aphorism
 func GetAnRandomWisdom(isPreview bool) (*Wisdom, error) {
 	// 解析wisdoms.json文件
-	list, err := ParseJsonWisdom(config.GetWisdomFile())
+	list, err := ParseJsonWisdom(config.GetWisdomFilePath())
 	if err != nil {
 		return nil, errors.Wrap(err, "wisdom handler got err")
 	}

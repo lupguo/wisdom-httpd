@@ -14,20 +14,11 @@ var (
 
 func main() {
 	pflag.Parse()
-	httpdSrv, err := httpd.NewHttpdServer(*configFile)
+	httpdServer, err := httpd.NewHttpdServer(*configFile)
 	if err != nil {
 		log.Fatalf("new httpd server got err %s", err)
 	}
 
-	// httpd server config
-	httpdSrv.ConfigMiddleware()
-
-	// 渲染
-	httpdSrv.ConfigRender()
-
-	// 路由处理
-	httpdSrv.ConfigRoute()
-
 	// http server start
-	httpdSrv.Start()
+	httpdServer.Start()
 }
