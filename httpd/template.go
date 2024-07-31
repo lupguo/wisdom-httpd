@@ -36,17 +36,7 @@ func InitParseWisdomTemplate() (*WisdomTemplate, error) {
 	)
 
 	// 解析&渲染全部模板文件
-	views := map[string][]string{
-		"files": {
-			"index.tmpl",
-			"wisdom.tmpl",
-		},
-		"glob": {
-			"main/*.tmpl",
-			"partial/*.tmpl",
-		},
-	}
-
+	views := config.GetViewParseFiles()
 	for t, view := range views {
 		viewPaths := config.GetViewPathList(view...)
 		switch t {

@@ -19,9 +19,10 @@ type WisdomConfig struct {
 
 // AssetConfig 视图路径配置
 type AssetConfig struct {
-	RootPath string `json:"root_path" yaml:"root_path"`
-	DistPath string `json:"dist_path" yaml:"dist_path"`
-	ViewPath string `json:"view_path" yaml:"view_path"`
+	RootPath       string              `json:"root_path" yaml:"root_path"`
+	DistPath       string              `json:"dist_path" yaml:"dist_path"`
+	ViewPath       string              `json:"view_path" yaml:"view_path"`
+	ViewParseFiles map[string][]string `json:"view_parse_files" yaml:"view_parse_files"`
 }
 
 // LogConfig 日志配置
@@ -102,4 +103,9 @@ func GetViewPathList(views ...string) []string {
 		paths = append(paths, AssetViewPath(view))
 	}
 	return paths
+}
+
+// GetViewParseFiles 视图解析的文件配置
+func GetViewParseFiles() map[string][]string {
+	return appCfg.Assets.ViewParseFiles
 }
