@@ -3,13 +3,16 @@ package httpd
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/lupguo/wisdom-httpd/app/api"
+	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 	"github.com/lupguo/wisdom-httpd/config"
 )
 
+type HandlerFunc func(c echo.Context) (data *entity.WebPageData, err error)
+
 type RouteHandler struct {
-	Method  string
-	URI     string
-	Handler echo.HandlerFunc
+	Method      string
+	URI         string
+	HandlerFunc HandlerFunc
 }
 
 // 路由配置
@@ -19,19 +22,30 @@ func routerInit(e *echo.Echo) {
 
 	// web路由
 	htmlRouterHandlers := []*RouteHandler{
-		// {"GET", "/index.html", api.IndexHandler},
-		{"GET", "/wisdom.html", api.WisdomHandler},
+		{"GET", "/", api.IndexHandler},
+		{"GET", "/wisdom", api.WisdomHandler},
 	}
-	htmlGroups := e.Group("/", []echo.MiddlewareFunc{
+	htmlGroups := e.Group("", []echo.MiddlewareFunc{
 		HTMLResponseMiddleware,
 	}...)
 	for _, h := range htmlRouterHandlers {
-		htmlGroups.Add(h.Method, h.URI, h.Handler)
+
+		// wrap函数
+		eFn := func(c echo.Context) error {
+			got, err := h.HandlerFunc(c)
+			if err != nil {
+				return err
+			}
+			c.Set("data", got)
+			return nil
+		}
+
+		htmlGroups.Add(h.Method, h.URI, eFn)
 	}
 
 	// api路由
 	apiRouterHandlers := []*RouteHandler{
-		{"GET", "/wisdom/rand", api.WisdomRandHandler},
+		{"GET", "/wisdom/rand", api.WisdomHandler},
 		// {"GET", "/code/show", api.CodeHandler},
 		// {"GET", "/files/upload", api.UploadHandler},
 		// {"GET", "/files/download", api.UploadHandler},
@@ -40,7 +54,17 @@ func routerInit(e *echo.Echo) {
 		JSONResponseMiddleware,
 	}...)
 	for _, h := range apiRouterHandlers {
-		apiGroups.Add(h.Method, h.URI, h.Handler)
+		// wrap函数
+		eFn := func(c echo.Context) error {
+			got, err := h.HandlerFunc(c)
+			if err != nil {
+				return err
+			}
+			c.Set("data", got)
+			return nil
+		}
+
+		apiGroups.Add(h.Method, h.URI, eFn)
 	}
 
 }

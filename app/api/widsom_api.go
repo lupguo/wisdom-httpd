@@ -9,12 +9,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"github.com/lupguo/go-shim/shim"
+	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 	"github.com/lupguo/wisdom-httpd/config"
 	"github.com/pkg/errors"
 )
 
 // WisdomHandler 名言处理
-func WisdomHandler(c echo.Context) error {
+func WisdomHandler(c echo.Context) (rsp *entity.WebPageData, err error) {
 	// 预览参数
 	preview := c.QueryParam("preview")
 	isPreview, _ := strconv.ParseBool(preview)
@@ -22,31 +23,13 @@ func WisdomHandler(c echo.Context) error {
 	// 获取wisdom
 	wisdom, err := GetRandomWisdom(isPreview)
 	if err != nil {
-		return shim.LogAndWrapErr(err, "fn[WisdomHandler] get rand wisdom got an err")
+		return nil, shim.LogAndWrapErr(err, "fn[WisdomHandler] get rand wisdom got an err")
 	}
 
-	// 数据设置
-	c.Set("data", wisdom)
-
-	return nil
-}
-
-// WisdomRandHandler 名言处理
-func WisdomRandHandler(c echo.Context) (err error) {
-	// 预览参数
-	preview := c.QueryParam("preview")
-	isPreview, _ := strconv.ParseBool(preview)
-
-	// 获取wisdom
-	wisdom, err := GetRandomWisdom(isPreview)
-	if err != nil {
-		return shim.LogAndWrapErr(err, "fn[WisdomRandHandler] get rand wisdom got an err")
-	}
-
-	// 数据设置
-	c.Set("data", wisdom)
-
-	return nil
+	return &entity.WebPageData{
+		TemplateName: "wisdom.tmpl",
+		PageData:     wisdom,
+	}, nil
 }
 
 // WisdomList 配置列表
