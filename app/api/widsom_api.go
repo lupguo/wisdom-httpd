@@ -3,48 +3,50 @@ package api
 import (
 	"encoding/json"
 	"math/rand"
-	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
+	"github.com/lupguo/go-shim/shim"
 	"github.com/lupguo/wisdom-httpd/config"
 	"github.com/pkg/errors"
 )
 
 // WisdomHandler 名言处理
-func WisdomHandler(c echo.Context) (err error) {
+func WisdomHandler(c echo.Context) error {
 	// 预览参数
-	isPreview := false
 	preview := c.QueryParam("preview")
-	if preview != "" {
-		isPreview, err = strconv.ParseBool(preview)
-		if err != nil {
-			log.Errorf("wisdom handler get err, parse query param[preview] got err: %v", err)
-		}
-	}
+	isPreview, _ := strconv.ParseBool(preview)
 
 	// 获取wisdom
-	wisdom, err := GetAnRandomWisdom(isPreview)
+	wisdom, err := GetRandomWisdom(isPreview)
 	if err != nil {
-		log.Errorf("wisdom handler get err, getAnRandomWisdom got err: %v", err)
-		return c.String(http.StatusOK, err.Error())
+		return shim.LogAndWrapErr(err, "fn[WisdomHandler] get rand wisdom got an err")
 	}
 
-	// json 响应
-	reqType := c.QueryParam("type")
-	if reqType == "json" {
-		data, err := json.Marshal(wisdom)
-		if err != nil {
-			return c.String(http.StatusOK, err.Error())
-		}
+	// 数据设置
+	c.Set("data", wisdom)
 
-		return c.JSONBlob(http.StatusOK, data)
+	return nil
+}
+
+// WisdomRandHandler 名言处理
+func WisdomRandHandler(c echo.Context) (err error) {
+	// 预览参数
+	preview := c.QueryParam("preview")
+	isPreview, _ := strconv.ParseBool(preview)
+
+	// 获取wisdom
+	wisdom, err := GetRandomWisdom(isPreview)
+	if err != nil {
+		return shim.LogAndWrapErr(err, "fn[WisdomRandHandler] get rand wisdom got an err")
 	}
 
-	// web html 响应
-	return c.Render(http.StatusOK, "wisdom.tmpl", wisdom)
+	// 数据设置
+	c.Set("data", wisdom)
+
+	return nil
 }
 
 // WisdomList 配置列表
@@ -76,8 +78,8 @@ type Wisdom struct {
 	Img      string `json:"img,omitempty"`      // 图片
 }
 
-// GetAnRandomWisdom Randomly obtain and generate a famous aphorism
-func GetAnRandomWisdom(isPreview bool) (*Wisdom, error) {
+// GetRandomWisdom Randomly obtain and generate a famous aphorism
+func GetRandomWisdom(isPreview bool) (*Wisdom, error) {
 	// 解析wisdoms.json文件
 	list, err := ParseJsonWisdom(config.GetWisdomFilePath())
 	if err != nil {

@@ -19,8 +19,6 @@ type WisdomConfig struct {
 
 // AssetConfig 视图路径配置
 type AssetConfig struct {
-	RootPath       string              `json:"root_path" yaml:"root_path"`
-	DistPath       string              `json:"dist_path" yaml:"dist_path"`
 	ViewPath       string              `json:"view_path" yaml:"view_path"`
 	ViewParseFiles map[string][]string `json:"view_parse_files" yaml:"view_parse_files"`
 }
@@ -36,7 +34,9 @@ type LogConfig struct {
 type AppConfig struct {
 	Listen string        `json:"listen" yaml:"listen"`
 	Log    *LogConfig    `json:"log" yaml:"log"`
+	Root   string        `json:"root" yaml:"root"`
 	Assets *AssetConfig  `json:"assets" yaml:"assets"`
+	Public string        `json:"public" yaml:"public"`
 	Wisdom *WisdomConfig `json:"wisdom" yaml:"wisdom"`
 }
 
@@ -72,14 +72,9 @@ func ParseConfig(filename string) (*AppConfig, error) {
 	return cfg.App, nil
 }
 
-// AssetRoot 返回项目根目录
-func AssetRoot() string {
-	return appCfg.Assets.RootPath
-}
-
-// DistPath 静态资源路径
-func DistPath() string {
-	return path.Join(appCfg.Assets.RootPath, appCfg.Assets.DistPath)
+// PublicPath 静态资源路径
+func PublicPath() string {
+	return path.Join(appCfg.Root, appCfg.Public)
 }
 
 // GetWisdomFilePath 获取wisdom文件
@@ -93,7 +88,7 @@ func GetWisdomFilePath() string {
 //	- 支持表达式: main/*.tmpl
 //	- 支持名称: index.tmpl、partial/error.tmpl
 func AssetViewPath(view string) string {
-	return path.Join(appCfg.Assets.RootPath, appCfg.Assets.ViewPath, view)
+	return path.Join(appCfg.Root, appCfg.Assets.ViewPath, view)
 }
 
 // GetViewPathList 获取视图文件的批path地址
