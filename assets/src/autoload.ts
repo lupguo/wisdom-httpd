@@ -1,4 +1,4 @@
-const WISDOM_URI = 'http://127.0.0.1:1666/api/wisdom';
+const WISDOM_URI = 'https://https://wisdom.tkstorm.com/api/wisdom';
 const REFRESH_INTERVAL = 10000; // 刷新间隔时间（毫秒）
 
 // 发送请求以获取智慧内容
