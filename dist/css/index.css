@@ -1,0 +1,24 @@
+/*首页*/
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 设置容器的高度为视口高度 */
+}
+
+.header {
+  background-color: #f0f0f0;
+  padding: 20px;
+  /* 导航栏样式 */
+}
+
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  /* 主内容区域样式 */
+}
+
+.footer {
+  background-color: #f0f0f0;
+  padding: 20px;
+  /* 底部信息样式 */
+}

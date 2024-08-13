@@ -28,6 +28,7 @@ func routerInit(e *echo.Echo) {
 	htmlGroups := e.Group("", []echo.MiddlewareFunc{
 		HTMLResponseMiddleware,
 	}...)
+
 	for _, h := range htmlRouterHandlers {
 
 		// wrap函数
@@ -45,7 +46,7 @@ func routerInit(e *echo.Echo) {
 
 	// api路由
 	apiRouterHandlers := []*RouteHandler{
-		{"GET", "/wisdom/rand", api.WisdomHandler},
+		{"GET", "/wisdom", api.WisdomHandler},
 		// {"GET", "/code/show", api.CodeHandler},
 		// {"GET", "/files/upload", api.UploadHandler},
 		// {"GET", "/files/download", api.UploadHandler},

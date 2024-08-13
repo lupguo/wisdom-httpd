@@ -1,7 +1,6 @@
+import autoRefreshWisdom from './autoload'
+
+// 自动加载
+autoRefreshWisdom()
+
 console.log("wisdom amazing!")
-
-function refreshWisdom() {
-
-}
-
-setInterval(refreshWisdom, 3000)
