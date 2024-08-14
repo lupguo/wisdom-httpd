@@ -13,16 +13,16 @@ import (
 // SrvImpl 接口初始化
 type SrvImpl struct {
 	c   echo.Context
-	app *application.WisdomApp
+	app application.WisdomAppInf
 }
 
-func NewImplAPI(app *application.WisdomApp) *SrvImpl {
+func NewImplAPI(app application.WisdomAppInf) *SrvImpl {
 	return &SrvImpl{app: app}
 }
 
 // IndexHandler 首页渲染
 func (impl *SrvImpl) IndexHandler(c echo.Context) (rsp *entity.WebPageData, err error) {
-	wisdom, err := application.GetRandomWisdom(false)
+	wisdom, err := impl.app.GetRandOneWisdom(false)
 	if err != nil {
 		return nil, err
 	}

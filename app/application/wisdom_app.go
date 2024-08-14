@@ -14,10 +14,7 @@ import (
 type WisdomAppInf interface {
 
 	// GetRandOneWisdom 随机获取一条至理名言
-	GetRandOneWisdom() (*entity.Wisdom, error)
-
-	// CronAIWisdomGenerate Open定时请求获取至理名言存储到DB中
-	// CronAIWisdomGenerate(intervalTime time.Duration) error
+	GetRandOneWisdom(isPreview bool) (*entity.Wisdom, error)
 }
 
 type WisdomApp struct {
@@ -27,8 +24,8 @@ func NewWisdomApp() *WisdomApp {
 	return &WisdomApp{}
 }
 
-// GetRandomWisdom Randomly obtain and generate a famous aphorism
-func GetRandomWisdom(isPreview bool) (*entity.Wisdom, error) {
+// GetRandOneWisdom Randomly obtain and generate a famous aphorism
+func (app *WisdomApp) GetRandOneWisdom(isPreview bool) (*entity.Wisdom, error) {
 	// 解析wisdoms.json文件
 	list, err := files.ParseJsonWisdom(config.GetWisdomFilePath())
 	if err != nil {

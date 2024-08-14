@@ -5,7 +5,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lupguo/go-shim/shim"
-	"github.com/lupguo/wisdom-httpd/app/application"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 )
 
@@ -16,7 +15,7 @@ func (impl *SrvImpl) WisdomHandler(c echo.Context) (rsp *entity.WebPageData, err
 	isPreview, _ := strconv.ParseBool(preview)
 
 	// 获取wisdom
-	wisdom, err := application.GetRandomWisdom(isPreview)
+	wisdom, err := impl.app.GetRandOneWisdom(isPreview)
 	if err != nil {
 		return nil, shim.LogAndWrapErr(err, "fn[WisdomHandler] get rand wisdom got an err")
 	}
