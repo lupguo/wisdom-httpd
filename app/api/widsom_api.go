@@ -9,16 +9,8 @@ import (
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 )
 
-type ImplAPI struct {
-	app application.WisdomApp
-}
-
-func NewImplAPI(app application.WisdomApp) *ImplAPI {
-	return &ImplAPI{app: app}
-}
-
 // WisdomHandler 名言处理
-func WisdomHandler(c echo.Context) (rsp *entity.WebPageDataRsp, err error) {
+func (impl *SrvImpl) WisdomHandler(c echo.Context) (rsp *entity.WebPageData, err error) {
 	// 预览参数
 	preview := c.QueryParam("preview")
 	isPreview, _ := strconv.ParseBool(preview)
@@ -29,7 +21,7 @@ func WisdomHandler(c echo.Context) (rsp *entity.WebPageDataRsp, err error) {
 		return nil, shim.LogAndWrapErr(err, "fn[WisdomHandler] get rand wisdom got an err")
 	}
 
-	return &entity.WebPageDataRsp{
+	return &entity.WebPageData{
 		TemplateName: "wisdom.tmpl",
 		PageData:     wisdom,
 	}, nil

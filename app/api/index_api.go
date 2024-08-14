@@ -10,14 +10,24 @@ import (
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 )
 
+// SrvImpl 接口初始化
+type SrvImpl struct {
+	c   echo.Context
+	app *application.WisdomApp
+}
+
+func NewImplAPI(app *application.WisdomApp) *SrvImpl {
+	return &SrvImpl{app: app}
+}
+
 // IndexHandler 首页渲染
-func IndexHandler(c echo.Context) (rsp *entity.WebPageDataRsp, err error) {
+func (impl *SrvImpl) IndexHandler(c echo.Context) (rsp *entity.WebPageData, err error) {
 	wisdom, err := application.GetRandomWisdom(false)
 	if err != nil {
 		return nil, err
 	}
 
-	rsp = &entity.WebPageDataRsp{
+	rsp = &entity.WebPageData{
 		TemplateName: "index.tmpl",
 		PageData: &entity.IndexPageData{
 			User:    &entity.User{Name: "TerryRod"},

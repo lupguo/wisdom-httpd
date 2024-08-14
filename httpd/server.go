@@ -4,15 +4,18 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/lupguo/wisdom-httpd/app/api"
+	"github.com/lupguo/wisdom-httpd/app/application"
 	"github.com/lupguo/wisdom-httpd/app/infra/config"
 	"github.com/pkg/errors"
 )
 
 // Server Http Server
 type Server struct {
-	cfg      *config.AppConfig
-	echo     *echo.Echo
-	logLevel log.Lvl
+	cfg       *config.AppConfig
+	echo      *echo.Echo
+	logLevel  log.Lvl
+	RouterMap RouterMap
 }
 
 // NewHttpdServer 创建Httpd服务实例
@@ -23,12 +26,15 @@ func NewHttpdServer(configFile string) (*Server, error) {
 		return nil, errors.Wrapf(err, "parse config file %s got err", configFile)
 	}
 
-	// 服务
+	// 服务实例注入
+	srvImpl := api.NewImplAPI(application.NewWisdomApp())
 	httpdServer := &Server{
-		cfg:      cfg,
-		echo:     echo.New(),
-		logLevel: GetLogLevel(),
+		cfg:       cfg,
+		echo:      echo.New(),
+		logLevel:  GetLogLevel(),
+		RouterMap: GetRouterConfigMap(srvImpl),
 	}
+
 	// 渲染
 	if err = httpdServer.InitRenderConfig(); err != nil {
 		return nil, err
@@ -64,7 +70,7 @@ func (s *Server) InitRenderConfig() error {
 
 // InitRouteConfig 路由配置
 func (s *Server) InitRouteConfig() {
-	routerInit(s.echo)
+	routerInit(s.echo, s.RouterMap)
 }
 
 // Start Httpd Server 服务期待

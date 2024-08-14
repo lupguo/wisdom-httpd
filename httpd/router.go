@@ -5,9 +5,10 @@ import (
 	"github.com/lupguo/wisdom-httpd/app/api"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 	"github.com/lupguo/wisdom-httpd/app/infra/config"
+	"github.com/pkg/errors"
 )
 
-type HandlerFunc func(c echo.Context) (data *entity.WebPageDataRsp, err error)
+type HandlerFunc func(c echo.Context) (data *entity.WebPageData, err error)
 
 type RouteHandler struct {
 	Method      string
@@ -15,65 +16,52 @@ type RouteHandler struct {
 	HandlerFunc HandlerFunc
 }
 
+type RouterMap map[string][]*RouteHandler
+
+// GetRouterConfigMap 路由配置，通过apiImpl实例注入
+func GetRouterConfigMap(apiImpl *api.SrvImpl) RouterMap {
+	return RouterMap{
+		"web": {
+			{"GET", "/", apiImpl.IndexHandler},
+			{"GET", "/wisdom", apiImpl.WisdomHandler},
+		},
+		"json": {
+			{"GET", "/wisdom", apiImpl.WisdomHandler},
+		},
+	}
+}
+
 // 路由配置
-func routerInit(e *echo.Echo) {
+func routerInit(e *echo.Echo, routerMap RouterMap) {
 	// 静态路由
-	initStaticRouter(e)
-
-	// web路由
-	initWebRouter(e)
-
-	// api路由
-	initAPIRouter(e)
-
-}
-
-func initAPIRouter(e *echo.Echo) {
-	apiRouterHandlers := []*RouteHandler{
-		{"GET", "/wisdom", api.WisdomHandler},
-	}
-	apiGroups := e.Group("/api", []echo.MiddlewareFunc{
-		JSONResponseMiddleware,
-	}...)
-	for _, h := range apiRouterHandlers {
-		// wrap函数
-		eFn := func(c echo.Context) error {
-			got, err := h.HandlerFunc(c)
-			if err != nil {
-				return err
-			}
-			c.Set("data", got)
-			return nil
-		}
-
-		apiGroups.Add(h.Method, h.URI, eFn)
-	}
-}
-
-// web路由
-func initWebRouter(e *echo.Echo) {
-	htmlRouterHandlers := []*RouteHandler{
-		{"GET", "/", api.IndexHandler},
-		{"GET", "/wisdom", api.WisdomHandler},
-	}
-	htmlGroups := e.Group("", []echo.MiddlewareFunc{
-		HTMLResponseMiddleware,
-	}...)
-	for _, h := range htmlRouterHandlers {
-		// wrap函数
-		eFn := func(c echo.Context) error {
-			got, err := h.HandlerFunc(c)
-			if err != nil {
-				return err
-			}
-			c.Set("data", got)
-			return nil
-		}
-		htmlGroups.Add(h.Method, h.URI, eFn)
-	}
-}
-
-// static路由
-func initStaticRouter(e *echo.Echo) {
 	e.Static("/", config.PublicPath())
+
+	// 动态路由
+	var prefix string
+	var middlewares []echo.MiddlewareFunc
+	for key, handlers := range routerMap {
+		switch key {
+		case "web":
+			middlewares = append(middlewares, WebResponseMiddleware)
+		case "json":
+			prefix = "api"
+			middlewares = append(middlewares, JSONResponseMiddleware)
+		}
+		rg := e.Group(prefix, middlewares...)
+
+		// router group处理
+		for _, h := range handlers {
+			eFn := func(c echo.Context) error {
+				// 使用注册的apiImpl实例方法处理
+				rsp, err := h.HandlerFunc(c)
+				if err != nil {
+					return errors.Wrap(err, "h.HandlerFunc got err")
+				}
+				c.Set("data", rsp)
+				return nil
+			}
+			rg.Add(h.Method, h.URI, eFn)
+		}
+
+	}
 }

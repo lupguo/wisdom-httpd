@@ -23,6 +23,10 @@ type WisdomAppInf interface {
 type WisdomApp struct {
 }
 
+func NewWisdomApp() *WisdomApp {
+	return &WisdomApp{}
+}
+
 // GetRandomWisdom Randomly obtain and generate a famous aphorism
 func GetRandomWisdom(isPreview bool) (*entity.Wisdom, error) {
 	// 解析wisdoms.json文件

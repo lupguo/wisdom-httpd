@@ -35,12 +35,12 @@ func JSONResponseMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		return c.JSON(status, Response{
 			Status:  "success",
 			Message: "Request processed successfully",
-			Data:    c.Get("data"), // 假设您在处理器中设置了数据
+			Data:    c.Get("data"), // 在处理器中设置的数据
 		})
 	}
 }
 
-func HTMLResponseMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func WebResponseMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// 调用下一个处理器
 		err := next(c)
@@ -50,12 +50,12 @@ func HTMLResponseMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// 获取响应状态码
 		data := c.Get("data")
-		pageData, ok := data.(*entity.WebPageDataRsp)
+		rsp, ok := data.(*entity.WebPageData)
 		if !ok {
-			err = errors.Errorf("fn[HTMLResponseMiddleware] web page data[%s] assert fail", shim.ToJsonString(data, false))
+			err = errors.Errorf("fn[WebResponseMiddleware] web page data[%s] assert fail", shim.ToJsonString(data, false))
 			return c.Render(http.StatusInternalServerError, "error.tmpl", err.Error())
 		}
 
-		return c.Render(http.StatusOK, pageData.GetTemplateName(), pageData.GetPageData())
+		return c.Render(http.StatusOK, rsp.GetTemplateName(), rsp.GetPageData())
 	}
 }
