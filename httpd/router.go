@@ -38,16 +38,15 @@ func routerInit(e *echo.Echo, routerMap RouterMap) {
 
 	// 动态路由
 	var prefix string
-	var middlewares []echo.MiddlewareFunc
 	for key, handlers := range routerMap {
+		rg := &echo.Group{}
 		switch key {
 		case "web":
-			middlewares = append(middlewares, WebResponseMiddleware)
+			rg = e.Group(prefix, []echo.MiddlewareFunc{WebResponseMiddleware}...)
 		case "json":
 			prefix = "api"
-			middlewares = append(middlewares, JSONResponseMiddleware)
+			rg = e.Group(prefix, []echo.MiddlewareFunc{JSONResponseMiddleware}...)
 		}
-		rg := e.Group(prefix, middlewares...)
 
 		// router group处理
 		for _, h := range handlers {

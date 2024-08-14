@@ -44,6 +44,7 @@ module.exports = {
             patterns: [
                 {from: 'assets/src/img/*', to: 'img/[name][ext]'},
                 {from: 'assets/src/css/*.css', to: 'css/[name].css'},
+                {from: 'assets/src/config/*.json', to: 'config/[name].json'},
             ],
         }),
     ],

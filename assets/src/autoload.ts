@@ -43,6 +43,7 @@ function refreshWisdom() {
 
 // 基于配置参数，自动请求后台API接口
 export function autoRefreshWisdom() {
+    console.log("begin auto refresh wisdom...")
     setInterval(refreshWisdom, globalConfig.REFRESH_INTERVAL);
 }
 
