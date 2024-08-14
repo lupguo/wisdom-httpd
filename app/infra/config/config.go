@@ -23,13 +23,6 @@ type AssetConfig struct {
 	ViewParseFiles map[string][]string `json:"view_parse_files" yaml:"view_parse_files"`
 }
 
-// LogConfig 日志配置
-type LogConfig struct {
-	LogLevel      string `json:"log_level" yaml:"log_level"`
-	LogFormat     string `json:"log_format" yaml:"log_format"`
-	LogTimeFormat string `json:"log_time_format" yaml:"log_time_format"`
-}
-
 // AppConfig App配置
 type AppConfig struct {
 	Listen string        `json:"listen" yaml:"listen"`

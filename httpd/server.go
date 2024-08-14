@@ -12,26 +12,40 @@ import (
 
 // Server Http Server
 type Server struct {
-	cfg       *config.AppConfig
+	appCfg    *config.AppConfig
+	logCfg    *config.LogConfig
 	echo      *echo.Echo
-	logLevel  log.Lvl
 	RouterMap RouterMap
 }
 
 // NewHttpdServer 创建Httpd服务实例
 func NewHttpdServer(configFile string) (*Server, error) {
 	// 应用配置
-	cfg, err := config.ParseConfig(configFile)
+	appCfg, err := config.ParseConfig(configFile)
 	if err != nil {
 		return nil, errors.Wrapf(err, "parse config file %s got err", configFile)
 	}
 
+	// 日志配置
+	logCfg, err := config.AppLogConfig()
+	if err != nil {
+		return nil, errors.Wrapf(err, "get app log config got err")
+	}
+	if err := logCfg.InitLogger(); err != nil {
+		return nil, errors.Wrapf(err, "init logger got err")
+	}
+	log.SetLevel(logCfg.GetLogLevel())
+
+	// echo 实例
+	e := echo.New()
+	e.HideBanner = true
+
 	// 服务实例注入
 	srvImpl := api.NewImplAPI(application.NewWisdomApp())
 	httpdServer := &Server{
-		cfg:       cfg,
-		echo:      echo.New(),
-		logLevel:  GetLogLevel(),
+		appCfg:    appCfg,
+		logCfg:    logCfg,
+		echo:      e,
 		RouterMap: GetRouterConfigMap(srvImpl),
 	}
 
@@ -53,8 +67,8 @@ func NewHttpdServer(configFile string) (*Server, error) {
 func (s *Server) InitMiddlewareConfig() {
 	s.echo.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Skipper:          middleware.DefaultSkipper,
-		Format:           GetLogFormat(),
-		CustomTimeFormat: GetLogTimeFormat(),
+		Format:           s.logCfg.GetLogFormat(),
+		CustomTimeFormat: s.logCfg.GetLogTimeFormat(),
 	}))
 }
 
@@ -74,12 +88,10 @@ func (s *Server) InitRouteConfig() {
 }
 
 // Start Httpd Server 服务期待
-func (s *Server) Start() {
-	addr := s.cfg.Listen
-
-	// 日志配置
-	log.SetLevel(s.logLevel)
+func (s *Server) Start() error {
+	addr := s.appCfg.Listen
 	log.Infof("listen: %v", addr)
-	s.echo.HideBanner = true
-	s.echo.Logger.Fatal(s.echo.Start(addr))
+
+	// 其他配置
+	return s.echo.Start(addr)
 }

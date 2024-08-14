@@ -20,5 +20,5 @@ func main() {
 	}
 
 	// http server start
-	httpdServer.Start()
+	log.Fatalf("http server start fail: %s", httpdServer.Start())
 }
