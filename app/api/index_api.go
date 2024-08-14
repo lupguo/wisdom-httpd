@@ -6,12 +6,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"github.com/lupguo/go-shim/shim"
+	"github.com/lupguo/wisdom-httpd/app/application"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 )
 
 // IndexHandler 首页渲染
 func IndexHandler(c echo.Context) (rsp *entity.WebPageDataRsp, err error) {
-	wisdom, err := GetRandomWisdom(false)
+	wisdom, err := application.GetRandomWisdom(false)
 	if err != nil {
 		return nil, err
 	}

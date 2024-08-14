@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 	"github.com/lupguo/wisdom-httpd/app/domain/repository"
-	"github.com/pkg/errors"
 )
 
 // WisdomServiceInf 领域服务要提供哪些能
@@ -24,23 +23,24 @@ type WisdomService struct {
 	cacheInfra  repository.WisdomCacheRepos
 }
 
-func (wisSrv *WisdomService) GetWisdom(limit int) ([]*entity.Wisdom, error) {
-	var wisdoms []*entity.Wisdom
-
-	return wisdoms, nil
-}
-
-func (wisSrv *WisdomService) PostWisdom(ents ...*entity.Wisdom) error {
-	var wisdoms []*entity.Wisdom
-
-	for _, wis := range ents {
-		wisdoms = append(wisdoms, wis)
-	}
-
-	err := wisSrv.dbsInfra.InsertWisdom(wisdoms)
-	if err != nil {
-		return errors.Wrap(err, "post wisdom got err")
-	}
-
-	return nil
-}
+//
+// func (wisSrv *WisdomService) GetWisdom(limit int) ([]*entity.Wisdom, error) {
+// 	var wisdoms []*entity.Wisdom
+//
+// 	return wisdoms, nil
+// }
+//
+// func (wisSrv *WisdomService) PostWisdom(ents ...*entity.Wisdom) error {
+// 	var wisdoms []*entity.Wisdom
+//
+// 	for _, wis := range ents {
+// 		wisdoms = append(wisdoms, wis)
+// 	}
+//
+// 	err := wisSrv.dbsInfra.InsertWisdom(wisdoms)
+// 	if err != nil {
+// 		return errors.Wrap(err, "post wisdom got err")
+// 	}
+//
+// 	return nil
+// }

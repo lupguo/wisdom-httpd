@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-	"github.com/lupguo/wisdom-httpd/config"
+	"github.com/lupguo/wisdom-httpd/app/infra/config"
 	"github.com/pkg/errors"
 )
 
@@ -27,7 +27,7 @@ func NewHttpdServer(configFile string) (*Server, error) {
 	httpdServer := &Server{
 		cfg:      cfg,
 		echo:     echo.New(),
-		logLevel: config.GetLogLevel(),
+		logLevel: GetLogLevel(),
 	}
 	// 渲染
 	if err = httpdServer.InitRenderConfig(); err != nil {
@@ -47,8 +47,8 @@ func NewHttpdServer(configFile string) (*Server, error) {
 func (s *Server) InitMiddlewareConfig() {
 	s.echo.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Skipper:          middleware.DefaultSkipper,
-		Format:           config.GetLogFormat(),
-		CustomTimeFormat: config.GetLogTimeFormat(),
+		Format:           GetLogFormat(),
+		CustomTimeFormat: GetLogTimeFormat(),
 	}))
 }
 

@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/labstack/echo/v4"
-	"github.com/lupguo/wisdom-httpd/config"
+	"github.com/lupguo/wisdom-httpd/app/infra/config"
 	"github.com/pkg/errors"
 )
 

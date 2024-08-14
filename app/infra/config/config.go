@@ -77,6 +77,14 @@ func PublicPath() string {
 	return path.Join(appCfg.Root, appCfg.Public)
 }
 
+// AppLogConfig 应用配置
+func AppLogConfig() (*LogConfig, error) {
+	if appCfg.Log == nil {
+		return nil, errors.New("empty log config")
+	}
+	return appCfg.Log, nil
+}
+
 // GetWisdomFilePath 获取wisdom文件
 func GetWisdomFilePath() string {
 	return appCfg.Wisdom.FilePath

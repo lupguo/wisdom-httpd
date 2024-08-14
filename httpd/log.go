@@ -1,15 +1,18 @@
-package config
+package httpd
 
 import (
 	"strings"
 
 	"github.com/labstack/gommon/log"
+	"github.com/lupguo/wisdom-httpd/app/infra/config"
 )
 
 // GetLogLevel 日志等级
 func GetLogLevel() log.Lvl {
+	logCfg, _ := config.AppLogConfig()
+
 	var level log.Lvl
-	strLvl := strings.ToLower(appCfg.Log.LogLevel)
+	strLvl := strings.ToLower(logCfg.LogLevel)
 	switch strLvl {
 	case "debug":
 		level = log.DEBUG
@@ -23,10 +26,14 @@ func GetLogLevel() log.Lvl {
 
 // GetLogFormat 获取应用的日志格式
 func GetLogFormat() string {
-	return appCfg.Log.LogFormat + "\n"
+	logCfg, _ := config.AppLogConfig()
+
+	return logCfg.LogFormat + "\n"
 }
 
 // GetLogTimeFormat 日志时间格式
 func GetLogTimeFormat() string {
-	return appCfg.Log.LogTimeFormat
+	logCfg, _ := config.AppLogConfig()
+
+	return logCfg.LogTimeFormat
 }
