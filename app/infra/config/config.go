@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/lupguo/go-shim/shim"
-	"github.com/lupguo/go-shim/x/log"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
@@ -55,7 +54,6 @@ func ParseConfig(filename string) (*AppConfig, error) {
 
 	// 设置系统默认值
 	appCfg = cfg.App
-	log.Infof("appConfig: %s", shim.ToJsonString(appCfg, true))
 
 	// 基本检测
 	if appCfg.Log == nil || appCfg.Assets == nil || appCfg.Wisdom == nil {

@@ -2,10 +2,13 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
-	"github.com/labstack/gommon/log"
+	"github.com/labstack/echo/v4"
+	elog "github.com/labstack/gommon/log"
+	"github.com/sirupsen/logrus"
 )
 
 // LogConfig 日志配置
@@ -18,16 +21,16 @@ type LogConfig struct {
 }
 
 // GetLogLevel 日志等级
-func (cfg *LogConfig) GetLogLevel() log.Lvl {
-	var level log.Lvl
+func (cfg *LogConfig) GetLogLevel() elog.Lvl {
+	var level elog.Lvl
 	strLvl := strings.ToLower(cfg.LogLevel)
 	switch strLvl {
 	case "debug":
-		level = log.DEBUG
+		level = elog.DEBUG
 	case "info":
-		level = log.INFO
+		level = elog.INFO
 	default:
-		level = log.ERROR
+		level = elog.ERROR
 	}
 	return level
 }
@@ -43,20 +46,28 @@ func (cfg *LogConfig) GetLogTimeFormat() string {
 }
 
 // InitLogger 初始化日志输出
-func (cfg *LogConfig) InitLogger() error {
+func InitLogger(e *echo.Echo, cfg *LogConfig) (*logrus.Logger, error) {
+	// 注入logrus
+	stdLog := logrus.StandardLogger()
+	stdLog.SetLevel(logrus.DebugLevel)
+
+	// 设置输出位置
+	var output io.Writer
 	switch cfg.Type {
 	case "console":
 		// 输出到控制台
-		log.SetOutput(os.Stdout)
+		output = os.Stdout
 	case "file":
 		// 输出到文件
 		file, err := os.OpenFile(cfg.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
-			return fmt.Errorf("failed to open log file: %w", err)
+			return nil, fmt.Errorf("failed to open log file: %w", err)
 		}
-		log.SetOutput(file)
+		output = file
 	default:
-		return fmt.Errorf("unknown output type: %s", cfg.Type)
+		return nil, fmt.Errorf("unknown output type: %s", cfg.Type)
 	}
-	return nil
+	stdLog.SetOutput(output)
+
+	return stdLog, nil
 }
