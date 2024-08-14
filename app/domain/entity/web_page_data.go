@@ -1,14 +1,14 @@
 package entity
 
-type WebPageData struct {
+type WebPageDataRsp struct {
 	TemplateName string
 	PageData     any
 }
 
-func (w *WebPageData) GetTemplateName() string {
+func (w *WebPageDataRsp) GetTemplateName() string {
 	return w.TemplateName
 }
 
-func (w *WebPageData) GetPageData() any {
+func (w *WebPageDataRsp) GetPageData() any {
 	return w.PageData
 }

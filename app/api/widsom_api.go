@@ -15,7 +15,7 @@ import (
 )
 
 // WisdomHandler 名言处理
-func WisdomHandler(c echo.Context) (rsp *entity.WebPageData, err error) {
+func WisdomHandler(c echo.Context) (rsp *entity.WebPageDataRsp, err error) {
 	// 预览参数
 	preview := c.QueryParam("preview")
 	isPreview, _ := strconv.ParseBool(preview)
@@ -26,7 +26,7 @@ func WisdomHandler(c echo.Context) (rsp *entity.WebPageData, err error) {
 		return nil, shim.LogAndWrapErr(err, "fn[WisdomHandler] get rand wisdom got an err")
 	}
 
-	return &entity.WebPageData{
+	return &entity.WebPageDataRsp{
 		TemplateName: "wisdom.tmpl",
 		PageData:     wisdom,
 	}, nil
@@ -38,8 +38,16 @@ type WisdomList struct {
 	Sentences []string `json:"sentences,omitempty"`
 }
 
-// ParseJsonWisdom 从json解析wisdom
-func ParseJsonWisdom(filename string) (*WisdomList, error) {
+// Wisdom 名言警句
+type Wisdom struct {
+	Sentence string `json:"sentence,omitempty"` // 句子
+	WType    int    `json:"w_type,omitempty"`   // 类型
+	Desc     string `json:"desc,omitempty"`     // 描述
+	Img      string `json:"img,omitempty"`      // 图片
+}
+
+// parseJsonWisdom 从json解析wisdom
+func parseJsonWisdom(filename string) (*WisdomList, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, errors.Wrap(err, "read file `wisdomHandler.json` got err")
@@ -53,18 +61,10 @@ func ParseJsonWisdom(filename string) (*WisdomList, error) {
 	return &ws, nil
 }
 
-// Wisdom 名言警句
-type Wisdom struct {
-	Sentence string `json:"sentence,omitempty"` // 句子
-	WType    int    `json:"w_type,omitempty"`   // 类型
-	Desc     string `json:"desc,omitempty"`     // 描述
-	Img      string `json:"img,omitempty"`      // 图片
-}
-
 // GetRandomWisdom Randomly obtain and generate a famous aphorism
 func GetRandomWisdom(isPreview bool) (*Wisdom, error) {
 	// 解析wisdoms.json文件
-	list, err := ParseJsonWisdom(config.GetWisdomFilePath())
+	list, err := parseJsonWisdom(config.GetWisdomFilePath())
 	if err != nil {
 		return nil, errors.Wrap(err, "wisdom handler got err")
 	}

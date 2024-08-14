@@ -7,7 +7,7 @@ import (
 	"github.com/lupguo/wisdom-httpd/config"
 )
 
-type HandlerFunc func(c echo.Context) (data *entity.WebPageData, err error)
+type HandlerFunc func(c echo.Context) (data *entity.WebPageDataRsp, err error)
 
 type RouteHandler struct {
 	Method      string

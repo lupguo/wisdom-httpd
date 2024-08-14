@@ -50,7 +50,7 @@ func HTMLResponseMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// 获取响应状态码
 		data := c.Get("data")
-		pageData, ok := data.(*entity.WebPageData)
+		pageData, ok := data.(*entity.WebPageDataRsp)
 		if !ok {
 			err = errors.Errorf("fn[HTMLResponseMiddleware] web page data[%s] assert fail", shim.ToJsonString(data, false))
 			return c.Render(http.StatusInternalServerError, "error.tmpl", err.Error())

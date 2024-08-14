@@ -1,0 +1,4 @@
+{
+    "WISDOM_URI": "https://wisdom.tkstorm.com/api/wisdom",
+    "REFRESH_INTERVAL": 10000
+}

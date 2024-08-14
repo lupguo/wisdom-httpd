@@ -10,13 +10,13 @@ import (
 )
 
 // IndexHandler 首页渲染
-func IndexHandler(c echo.Context) (rsp *entity.WebPageData, err error) {
+func IndexHandler(c echo.Context) (rsp *entity.WebPageDataRsp, err error) {
 	wisdom, err := GetRandomWisdom(false)
 	if err != nil {
 		return nil, err
 	}
 
-	rsp = &entity.WebPageData{
+	rsp = &entity.WebPageDataRsp{
 		TemplateName: "index.tmpl",
 		PageData: &entity.IndexPageData{
 			User:    &entity.User{Name: "TerryRod"},

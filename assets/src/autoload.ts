@@ -1,10 +1,9 @@
-const WISDOM_URI = 'https://wisdom.tkstorm.com/api/wisdom';
-const REFRESH_INTERVAL = 10000; // 刷新间隔时间（毫秒）
+import {globalConfig} from './config'
 
 // 发送请求以获取智慧内容
 async function fetchWisdom() {
     try {
-        const response = await fetch(WISDOM_URI);
+        const response = await fetch(globalConfig.WISDOM_URI);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -42,7 +41,8 @@ function refreshWisdom() {
     });
 }
 
-// 启动自动刷新
-export default function autoRefreshWisdom() {
-    setInterval(refreshWisdom, REFRESH_INTERVAL);
+// 基于配置参数，自动请求后台API接口
+export function autoRefreshWisdom() {
+    setInterval(refreshWisdom, globalConfig.REFRESH_INTERVAL);
 }
+
