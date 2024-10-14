@@ -1,4 +1,4 @@
 {
     "WISDOM_URI": "/api/wisdom",
-    "REFRESH_INTERVAL": 30000
+    "REFRESH_INTERVAL": 300000
 }
