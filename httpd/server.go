@@ -12,10 +12,10 @@ import (
 
 // Server Http Server
 type Server struct {
-	cfg    *conf.Config
+	Cfg    *conf.Config
+	Router *Router
 	echo   *echo.Echo
 	stdLog *log.Logger
-	router *Router
 }
 
 // NewHttpdServer 创建Httpd服务实例
@@ -33,22 +33,27 @@ func NewHttpdServer(configFile string) (*Server, error) {
 	// 日志配置
 	stdLog, err := conf.InitLogger(cfg.Log)
 	if err != nil {
-		return nil, errors.Wrapf(err, "init logger got err")
+		return nil, errors.Wrapf(err, "build logger got err")
 	}
 	e.Use(LogrusMiddleware(stdLog))
 
 	// 配置tmpl渲染器
 	render, err := NewWisdomRenderer()
 	if err != nil {
-		return nil, errors.Wrap(err, "init wisdom template got err")
+		return nil, errors.Wrap(err, "build wisdom template got err")
 	}
 	e.Renderer = render
 
 	// 路由器配置，通过依赖注入方式实现
 	srvImpl := api.NewWisdomImpl(application.NewWisdomApp())
+	router, err := InitRouter(e, srvImpl)
+	if err != nil {
+		return nil, errors.Wrap(err, "init router got err")
+	}
 	svr := &Server{
-		cfg:    cfg,
-		router: InitRouter(e, srvImpl),
+		Cfg:    cfg,
+		echo:   e,
+		Router: router,
 		stdLog: stdLog,
 	}
 
@@ -60,7 +65,7 @@ func (s *Server) Start() error {
 	log.Infof("svr config: %s", shim.ToJsonString(s, true))
 
 	// 监听点
-	addr := s.cfg.Listen
+	addr := s.Cfg.Listen
 	log.Infof("listen: http://%s", addr)
 
 	// 其他配置

@@ -29,26 +29,32 @@ func registerRoutes(apiImpl *api.SrvImpl) []*RouteHandler {
 }
 
 // InitRouter 创建一个Web路由
-func InitRouter(echo *echo.Echo, apiImpl *api.SrvImpl) *Router {
-	return &Router{
+func InitRouter(echo *echo.Echo, apiImpl *api.SrvImpl) (*Router, error) {
+	r := &Router{
 		echo:          echo,
-		routeHandlers: registerRoutes(apiImpl),
+		RouteHandlers: registerRoutes(apiImpl),
 	}
+
+	if err := r.build(); err != nil {
+		return nil, errors.Wrap(err, "build router got err")
+	}
+
+	return r, nil
 }
 
 // Router Web路由
 type Router struct {
+	RouteHandlers []*RouteHandler
 	echo          *echo.Echo
-	routeHandlers []*RouteHandler
 }
 
-// HandleConfig 处理路由注册
-func (r *Router) HandleConfig() error {
+// build 处理路由注册
+func (r *Router) build() error {
 	// 静态路由
 	r.echo.Static("/", conf.PublicPath())
 
 	// 动态路由
-	for _, h := range r.routeHandlers {
+	for _, h := range r.RouteHandlers {
 		// warp成使用注册的apiImpl实例方法处理
 		eHandleFn := func(c echo.Context) error {
 			rsp, err := h.HandleFunc(c, c.Request().Body)

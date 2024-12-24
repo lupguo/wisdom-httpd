@@ -11,7 +11,7 @@ import (
 func LogrusMiddleware(logger *logrus.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// 记录请求信息
+			// 请求信息
 			start := time.Now()
 			method := c.Request().Method
 			path := c.Request().URL.Path
@@ -19,7 +19,7 @@ func LogrusMiddleware(logger *logrus.Logger) echo.MiddlewareFunc {
 			// 调用下一个中间件或处理程序
 			err := next(c)
 
-			// 记录响应信息
+			// 响应信息
 			duration := time.Since(start)
 			status := c.Response().Status
 

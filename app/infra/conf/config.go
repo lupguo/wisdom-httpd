@@ -40,15 +40,15 @@ func ParseConfig(filename string) (*Config, error) {
 	// 解析config.yaml文件
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, errors.Wrapf(err, "read filename fail: %v", filename)
+		return nil, errors.Wrapf(err, "os.ReadFile(%s) got err", filename)
 	}
 	if err = yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, errors.Wrapf(err, "yaml unmarshal config fail")
+		return nil, errors.Wrapf(err, "yaml.Unmarshal got err")
 	}
 
 	// 基本检测
 	if cfg.Log == nil || cfg.Assets == nil || cfg.Wisdom == nil {
-		return nil, errors.Errorf("ugly app config: %s", shim.ToJsonString(cfg, false))
+		return nil, errors.Errorf("empty app config: %s", shim.ToJsonString(cfg, false))
 	}
 
 	return cfg, nil

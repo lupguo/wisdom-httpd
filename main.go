@@ -16,7 +16,7 @@ func main() {
 	pflag.Parse()
 	svr, err := httpd.NewHttpdServer(*configFile)
 	if err != nil {
-		log.Fatalf("new httpd server got err %s", err)
+		log.Fatalf("new httpd server got err, %s", err)
 	}
 
 	// http server start
