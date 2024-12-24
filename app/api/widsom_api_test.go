@@ -1,12 +1,14 @@
-package handler
+package api
 
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 )
 
 func TestMarshalWisdom(t *testing.T) {
-	w := &Wisdom{
+	w := &entity.Wisdom{
 		Sentence: "知行合一",
 		WType:    0,
 		Desc:     "强调理论与实践的统一，即将所学的知识付诸于实际行动中。",
@@ -24,7 +26,7 @@ func TestParseJsonWisdom(t *testing.T) {
 	]}
 `
 
-	var ws WisdomList
+	var ws entity.WisdomList
 	err := json.Unmarshal([]byte(data), &ws)
 	if err != nil {
 		t.Errorf("can not unmrashal data: %v", err)

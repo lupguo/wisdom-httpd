@@ -12,3 +12,6 @@ clean:
 # 定义目标为交叉编译 Linux 和 Windows 版本
 cross-compile:
 	GOOS=linux GOARCH=amd64 go build -o wisdom-httpd-linux-amd64 .
+
+update:
+	go get -u

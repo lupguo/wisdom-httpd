@@ -14,16 +14,11 @@ var (
 
 func main() {
 	pflag.Parse()
-	server, err := httpd.NewHttpdServer(*configFile)
+	httpdServer, err := httpd.NewHttpdServer(*configFile)
 	if err != nil {
 		log.Fatalf("new httpd server got err %s", err)
 	}
 
-	// httpd server config
-	server.ConfigMiddleware()
-	server.ConfigRender()
-	server.ConfigRoute()
-
 	// http server start
-	server.Start()
+	log.Fatalf("http server start fail: %s", httpdServer.Start())
 }

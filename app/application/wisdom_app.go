@@ -1,42 +1,58 @@
 package application
 
 import (
-	"time"
+	"math/rand"
 
+	"github.com/labstack/gommon/log"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
-	"github.com/lupguo/wisdom-httpd/app/domain/repository"
-	"github.com/lupguo/wisdom-httpd/app/domain/service"
+	"github.com/lupguo/wisdom-httpd/app/infra/config"
+	"github.com/lupguo/wisdom-httpd/app/infra/files"
+	"github.com/pkg/errors"
 )
 
 // WisdomAppInf wisdom应用接口
 type WisdomAppInf interface {
 
 	// GetRandOneWisdom 随机获取一条至理名言
-	GetRandOneWisdom() (*entity.Wisdom, error)
-
-	// CronAIWisdomGenerate Open定时请求获取至理名言存储到DB中
-	CronAIWisdomGenerate(intervalTime time.Duration) error
+	GetRandOneWisdom(isPreview bool) (*entity.Wisdom, error)
 }
 
 type WisdomApp struct {
-	// 生成Ai Repost
-	openAIInfra repository.WisdomOpenAIRepos
-
-	// 保存&读取wisdom
-	wisdomSrv service.WisdomServiceInf
 }
 
-func NewWisdomApp(openAIInfra repository.WisdomOpenAIRepos, wisdomSrv service.WisdomServiceInf) *WisdomApp {
-	return &WisdomApp{openAIInfra: openAIInfra, wisdomSrv: wisdomSrv}
+func NewWisdomApp() *WisdomApp {
+	return &WisdomApp{}
 }
 
-func (wisApp *WisdomApp) GetRandOneWisdom() (*entity.Wisdom, error) {
-	// TODO implement me
+// GetRandOneWisdom Randomly obtain and generate a famous aphorism
+func (app *WisdomApp) GetRandOneWisdom(isPreview bool) (*entity.Wisdom, error) {
+	// 解析wisdoms.json文件
+	list, err := files.ParseJsonWisdom(config.GetWisdomFilePath())
+	if err != nil {
+		return nil, errors.Wrap(err, "wisdom handler got err")
+	}
 
-	return &entity.Wisdom{}, nil
-}
+	// 从json文件获取指定的内容
+	sentences := list.Sentences
+	if isPreview == true {
+		sentences = list.Preview
+	}
+	if len(sentences) <= 0 {
+		return nil, errors.Errorf("get json content for preview[%v] is empty", isPreview)
+	}
 
-func (wisApp *WisdomApp) CronAIWisdomGenerate(intervalTime time.Duration) error {
+	// 获取所有的wisdom内容
+	var wisdoms []*entity.Wisdom
+	for _, s := range sentences {
+		wisdoms = append(wisdoms, &entity.Wisdom{
+			Sentence: s,
+		})
+	}
 
-	return nil
+	// 随机生成一条wisdom内容
+	randIdx := rand.Int31n(int32(len(wisdoms)))
+	randWisdom := wisdoms[randIdx]
+	log.Debugf("rand wisdom: %v", randWisdom)
+
+	return randWisdom, nil
 }

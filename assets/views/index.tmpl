@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <link rel="stylesheet" href="/css/index.css">
-    <script type="application/javascript" src="/js/index.js"></script>
+    <script type="application/javascript" src="/index.js"></script>
     <title>Wisdom</title>
 </head>
 <body>
@@ -15,11 +15,7 @@
 
     <!-- 主内容区域 -->
     <div class="content">
-        {{if .Error }}
-            {{include "partial/error.tmpl" .}}
-        {{ else }}
-            {{include "main/content.tmpl" .}}
-        {{ end }}
+        {{include "main/content.tmpl" .}}
     </div>
 
     <!-- 底部信息 -->
