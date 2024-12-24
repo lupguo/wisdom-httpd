@@ -1,14 +1,14 @@
 package entity
 
-type WebPageData struct {
-	TemplateName string
-	PageData     any
-}
-
-func (w *WebPageData) GetTemplateName() string {
-	return w.TemplateName
-}
-
-func (w *WebPageData) GetPageData() any {
-	return w.PageData
-}
+// type Response struct {
+// 	TemplateName string
+// 	PageData     any
+// }
+//
+// func (w *Response) GetTemplateName() string {
+// 	return w.TemplateName
+// }
+//
+// func (w *Response) GetPageData() any {
+// 	return w.PageData
+// }

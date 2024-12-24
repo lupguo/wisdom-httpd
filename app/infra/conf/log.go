@@ -1,4 +1,4 @@
-package config
+package conf
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/labstack/echo/v4"
 	elog "github.com/labstack/gommon/log"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -46,12 +46,18 @@ func (cfg *LogConfig) GetLogTimeFormat() string {
 }
 
 // InitLogger 初始化日志输出
-func InitLogger(e *echo.Echo, cfg *LogConfig) (*logrus.Logger, error) {
+func InitLogger(cfg *LogConfig) (*logrus.Logger, error) {
 	// 注入logrus
 	stdLog := logrus.StandardLogger()
-	stdLog.SetLevel(logrus.DebugLevel)
 
-	// 设置输出位置
+	// 设置log等级
+	level, err := logrus.ParseLevel(strings.ToLower(cfg.LogLevel))
+	if err != nil {
+		return nil, errors.Wrap(err, "parse logrus level")
+	}
+	stdLog.SetLevel(level)
+
+	// 设置log输出位置
 	var output io.Writer
 	switch cfg.Type {
 	case "console":

@@ -5,14 +5,13 @@ import (
 
 	"github.com/labstack/gommon/log"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
-	"github.com/lupguo/wisdom-httpd/app/infra/config"
+	"github.com/lupguo/wisdom-httpd/app/infra/conf"
 	"github.com/lupguo/wisdom-httpd/app/infra/files"
 	"github.com/pkg/errors"
 )
 
 // WisdomAppInf wisdom应用接口
 type WisdomAppInf interface {
-
 	// GetRandOneWisdom 随机获取一条至理名言
 	GetRandOneWisdom(isPreview bool) (*entity.Wisdom, error)
 }
@@ -27,7 +26,7 @@ func NewWisdomApp() *WisdomApp {
 // GetRandOneWisdom Randomly obtain and generate a famous aphorism
 func (app *WisdomApp) GetRandOneWisdom(isPreview bool) (*entity.Wisdom, error) {
 	// 解析wisdoms.json文件
-	list, err := files.ParseJsonWisdom(config.GetWisdomFilePath())
+	list, err := files.ParseJsonWisdom(conf.GetWisdomFilePath())
 	if err != nil {
 		return nil, errors.Wrap(err, "wisdom handler got err")
 	}
