@@ -1,7 +1,7 @@
 package entity
 
-// // Wisdom 治理名言实体
-// type Wisdom struct {
+// // GetOneWisdom 治理名言实体
+// type GetOneWisdom struct {
 // 	Id          uint32    `json:"id,omitempty"`          // 主键
 // 	WisdomCode  string    `json:"wisdom_code"`           // 名言16进制编码（对外展示）
 // 	WisdomType  int       `json:"wisdom_type,omitempty"` // 名言类型

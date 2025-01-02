@@ -46,7 +46,7 @@ func LogrusMiddleware(logger *logrus.Logger) echo.MiddlewareFunc {
 //
 // // JSONResponseMiddleware JSON渲染
 // func JSONResponseMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-// 	return func(c echo.Context) error {
+// 	return func(c echo.WisdomContext) error {
 // 		// 调用下一个处理器
 // 		err := next(c)
 // 		if err != nil {
@@ -71,7 +71,7 @@ func LogrusMiddleware(logger *logrus.Logger) echo.MiddlewareFunc {
 //
 // // WebResponseMiddleware Web渲染
 // func WebResponseMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-// 	return func(c echo.Context) error {
+// 	return func(c echo.WisdomContext) error {
 // 		// 调用下一个处理器
 // 		err := next(c)
 // 		if err != nil {

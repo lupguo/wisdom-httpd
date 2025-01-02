@@ -1,23 +1,63 @@
 package api
 
 import (
-	"strconv"
-
-	"github.com/labstack/echo/v4"
 	"github.com/lupguo/go-shim/shim"
+	"github.com/lupguo/go-shim/x/log"
+	"github.com/lupguo/wisdom-httpd/app/application"
+	"github.com/lupguo/wisdom-httpd/app/domain/entity"
+	"github.com/lupguo/wisdom-httpd/internal/util"
 )
 
-// WisdomHandler 名言处理
-func (impl *SrvImpl) WisdomHandler(c echo.Context, req any) (rsp any, err error) {
-	// 预览参数
-	preview := c.QueryParam("preview")
-	isPreview, _ := strconv.ParseBool(preview)
+// WisdomHandler 接口初始化
+type WisdomHandler struct {
+	app application.WisdomAppInf
+}
 
-	// 获取wisdom
-	wisdom, err := impl.app.GetRandOneWisdom(isPreview)
+// NewWisdomImpl 初始化wisdom实现
+func NewWisdomImpl(app application.WisdomAppInf) *WisdomHandler {
+	return &WisdomHandler{app: app}
+}
+
+// Index 首页渲染
+func (h *WisdomHandler) Index(ctx *util.Context, _ any) (rsp any, err error) {
+	wisdom, err := h.app.GetRandOneWisdom(nil, false)
 	if err != nil {
-		return nil, shim.LogAndWrapErr(err, "fn[WisdomHandler] get rand wisdom got an err")
+		return nil, err
 	}
 
-	return wisdom, nil
+	rsp = &entity.IndexPageData{
+		User:    &entity.User{Name: "TerryRod"},
+		Wisdom:  wisdom.Sentence,
+		Content: "wisdom page index content",
+	}
+
+	log.Infof("rsp <= %s", shim.ToJsonString(rsp))
+	return rsp, nil
+}
+
+// GetOneWisdom 名言处理
+func (h *WisdomHandler) GetOneWisdom(ctx *util.Context, _ any) (rsp any, err error) {
+	req := &entity.GetOneWisdomReq{}
+	if err = ctx.Bind(&req); err != nil {
+		return nil, err
+	}
+
+	// 获取wisdom
+	log.Infof("req => %s", shim.ToJsonString(req))
+	wisdom, err := h.app.GetRandOneWisdom(nil, req.Preview)
+	if err != nil {
+		return nil, shim.LogAndWrapErr(err, "fn[GetOneWisdom] get rand wisdom got an err")
+	}
+	rsp = &entity.GetOneWisdomRsp{
+		Sentence: wisdom.Sentence,
+	}
+
+	log.Infof("rsp <= %s", shim.ToJsonString(rsp))
+	return rsp, nil
+}
+
+// SaveWisdom 保存
+func (h *WisdomHandler) SaveWisdom(ctx *util.Context, _ any) (rsp any, err error) {
+
+	return nil, nil
 }

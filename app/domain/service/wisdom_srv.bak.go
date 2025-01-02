@@ -24,14 +24,14 @@ type WisdomService struct {
 }
 
 //
-// func (wisSrv *WisdomService) GetWisdom(limit int) ([]*entity.Wisdom, error) {
-// 	var wisdoms []*entity.Wisdom
+// func (wisSrv *WisdomService) GetWisdom(limit int) ([]*entity.GetOneWisdom, error) {
+// 	var wisdoms []*entity.GetOneWisdom
 //
 // 	return wisdoms, nil
 // }
 //
-// func (wisSrv *WisdomService) PostWisdom(ents ...*entity.Wisdom) error {
-// 	var wisdoms []*entity.Wisdom
+// func (wisSrv *WisdomService) PostWisdom(ents ...*entity.GetOneWisdom) error {
+// 	var wisdoms []*entity.GetOneWisdom
 //
 // 	for _, wis := range ents {
 // 		wisdoms = append(wisdoms, wis)

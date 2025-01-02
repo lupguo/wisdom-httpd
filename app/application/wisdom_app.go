@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"math/rand"
 
 	"github.com/labstack/gommon/log"
@@ -13,7 +14,7 @@ import (
 // WisdomAppInf wisdom应用接口
 type WisdomAppInf interface {
 	// GetRandOneWisdom 随机获取一条至理名言
-	GetRandOneWisdom(isPreview bool) (*entity.Wisdom, error)
+	GetRandOneWisdom(ctx context.Context, isPreview bool) (*entity.Wisdom, error)
 }
 
 type WisdomApp struct {
@@ -24,7 +25,7 @@ func NewWisdomApp() *WisdomApp {
 }
 
 // GetRandOneWisdom Randomly obtain and generate a famous aphorism
-func (app *WisdomApp) GetRandOneWisdom(isPreview bool) (*entity.Wisdom, error) {
+func (app *WisdomApp) GetRandOneWisdom(ctx context.Context, isPreview bool) (*entity.Wisdom, error) {
 	// 解析wisdoms.json文件
 	list, err := files.ParseJsonWisdom(conf.GetWisdomFilePath())
 	if err != nil {
