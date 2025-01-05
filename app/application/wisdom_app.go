@@ -27,7 +27,7 @@ func NewWisdomApp() *WisdomApp {
 // GetRandOneWisdom Randomly obtain and generate a famous aphorism
 func (app *WisdomApp) GetRandOneWisdom(ctx context.Context, isPreview bool) (*entity.Wisdom, error) {
 	// 解析wisdoms.json文件
-	list, err := files.ParseJsonWisdom(conf.GetWisdomFilePath())
+	list, err := files.ParseJsonWisdom(conf.GetWisdomSentenceFilePath())
 	if err != nil {
 		return nil, errors.Wrap(err, "wisdom handler got err")
 	}

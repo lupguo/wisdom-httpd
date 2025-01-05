@@ -10,11 +10,19 @@ Accept: application/json
 GET http://{{host}}/api/wisdom
 Accept: application/json
 
-###
-# 首页
+### 首页
 GET http://{{host}}
-Accept: application/json
+Content-Type: application/json
 
-###
+### POST 首页
+POST http://{{host}}?startTime=20240101&type=custom
+Content-Type: application/json
 
+{
+    "user": {
+        "id": 100,
+        "like": "coding"
+    },
+    "age": 36
+}
 

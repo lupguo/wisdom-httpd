@@ -1,11 +1,16 @@
 package httpd
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lupguo/go-shim/shim"
 	"github.com/lupguo/wisdom-httpd/app/api"
 	"github.com/lupguo/wisdom-httpd/app/infra/conf"
+	"github.com/lupguo/wisdom-httpd/internal/log"
 	"github.com/lupguo/wisdom-httpd/internal/util"
 	"github.com/pkg/errors"
 )
@@ -17,8 +22,8 @@ type HandleFunc func(ctx *util.Context, req any) (rsp any, err error)
 type RouteHandler struct {
 	Method       string
 	URI          string
-	HandleFunc   HandleFunc
-	TemplateName string // 路由模版，纯JSON可以忽略
+	HandleFunc   HandleFunc `json:"-"`
+	TemplateName string     // 路由模版，纯JSON可以忽略
 }
 
 // registerRoutes 路由配置，通过apiImpl实例注入
@@ -32,8 +37,8 @@ func registerRoutes(api *api.WisdomHandler) []*RouteHandler {
 	}
 }
 
-// InitRouter 创建一个Web路由
-func InitRouter(echo *echo.Echo, apiImpl *api.WisdomHandler) (*Router, error) {
+// RegisterRouterHandler 创建一个Web路由
+func RegisterRouterHandler(echo *echo.Echo, apiImpl *api.WisdomHandler) (*Router, error) {
 	r := &Router{
 		echo:          echo,
 		RouteHandlers: registerRoutes(apiImpl),
@@ -59,34 +64,60 @@ func (r *Router) build() error {
 
 	// 动态路由
 	for _, h := range r.RouteHandlers {
-		// warp成Echo处理处理
-		echoHttpHandleFunc := func(c echo.Context) error {
-			// todo set req as the second param to h.HandleFun
-			req := map[string]any{}
-			_ = c.Bind(&req)
-
-			rsp, err := h.HandleFunc(util.NewContext(c), req)
-			if err != nil {
-				return errors.Wrap(err, "h.HandleFunc got err")
-			}
-
-			// json or html render
-			switch c.Request().Header.Get("Content-Type") {
-			case "application/json":
-				return c.JSON(http.StatusOK, rsp)
-			case "text/html":
-				if h.TemplateName == "" {
-					return errors.Errorf("URI[%s] html template name is empty", h.URI)
-				}
-				return c.Render(http.StatusOK, h.TemplateName, rsp)
-			}
-
-			return nil
-		}
-
-		// 分组添加
-		r.echo.Router().Add(h.Method, h.URI, echoHttpHandleFunc)
+		r.echo.Router().Add(h.Method, h.URI, warpRouteHandleToEchoHandle(h))
 	}
 
 	return nil
+}
+
+// 通过注入RouteHandle
+func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err error) {
+	return func(c echo.Context) (err error) {
+		ctx := util.NewContext(c)
+
+		// reqBody deal
+		reqbody, err := io.ReadAll(ctx.Request().Body)
+		if err != nil {
+			return err
+		}
+
+		var reqm map[string]any
+		err = json.Unmarshal(reqbody, &reqm)
+		if err != nil {
+			return errors.Wrap(err, "router json unmarshal reqbody err")
+		}
+
+		// Biz 请求+响应日志打印
+		var rsp any
+		start := time.Now()
+		defer func(c *util.Context, start time.Time) {
+			fields := map[string]any{
+				log.FieldError:   err,
+				log.FieldElapsed: time.Since(start),
+				log.FieldReq:     shim.ToJsonString(reqm),
+				log.FieldRsp:     shim.ToJsonString(rsp),
+			}
+			log.WithFilesInfoContextf(fields, ctx, "%s", "")
+		}(ctx, start)
+
+		// Biz 处理
+		rsp, err = h.HandleFunc(ctx, reqbody)
+		if err != nil {
+			return log.WrapErrorContextf(ctx, err, "h.HandleFunc got err")
+		}
+		c.Set("rsp", rsp)
+
+		// Biz 结果响应
+		switch c.Request().Header.Get("Content-Type") {
+		case "application/json":
+			return c.JSON(http.StatusOK, rsp)
+		case "text/html":
+			if h.TemplateName == "" {
+				return errors.Errorf("URI[%s] html template name is empty", h.URI)
+			}
+			return c.Render(http.StatusOK, h.TemplateName, rsp)
+		}
+
+		return nil
+	}
 }

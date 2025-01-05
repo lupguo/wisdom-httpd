@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/lupguo/go-shim/shim"
-	"github.com/lupguo/go-shim/x/log"
 	"github.com/lupguo/wisdom-httpd/app/application"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
+	"github.com/lupguo/wisdom-httpd/internal/log"
 	"github.com/lupguo/wisdom-httpd/internal/util"
 )
 
@@ -19,7 +19,7 @@ func NewWisdomImpl(app application.WisdomAppInf) *WisdomHandler {
 }
 
 // Index 首页渲染
-func (h *WisdomHandler) Index(ctx *util.Context, _ any) (rsp any, err error) {
+func (h *WisdomHandler) Index(ctx *util.Context, req any) (rsp any, err error) {
 	wisdom, err := h.app.GetRandOneWisdom(nil, false)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,6 @@ func (h *WisdomHandler) Index(ctx *util.Context, _ any) (rsp any, err error) {
 		Content: "wisdom page index content",
 	}
 
-	log.Infof("rsp <= %s", shim.ToJsonString(rsp))
 	return rsp, nil
 }
 
@@ -46,7 +45,7 @@ func (h *WisdomHandler) GetOneWisdom(ctx *util.Context, _ any) (rsp any, err err
 	log.Infof("req => %s", shim.ToJsonString(req))
 	wisdom, err := h.app.GetRandOneWisdom(nil, req.Preview)
 	if err != nil {
-		return nil, shim.LogAndWrapErr(err, "fn[GetOneWisdom] get rand wisdom got an err")
+		return nil, log.WrapErrorContextf(ctx, err, "fn[GetOneWisdom] get rand wisdom got an err")
 	}
 	rsp = &entity.GetOneWisdomRsp{
 		Sentence: wisdom.Sentence,

@@ -6,8 +6,8 @@ import (
 	"github.com/lupguo/wisdom-httpd/app/api"
 	"github.com/lupguo/wisdom-httpd/app/application"
 	"github.com/lupguo/wisdom-httpd/app/infra/conf"
+	"github.com/lupguo/wisdom-httpd/internal/log"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // Server Http Server
@@ -15,7 +15,6 @@ type Server struct {
 	Cfg    *conf.Config
 	Router *Router
 	echo   *echo.Echo
-	stdLog *log.Logger
 }
 
 // NewHttpdServer 创建Httpd服务实例
@@ -31,11 +30,11 @@ func NewHttpdServer(configFile string) (*Server, error) {
 	}
 
 	// 日志配置
-	stdLog, err := conf.InitLogger(cfg.Log)
+	err = log.NewServerLog(cfg.LogConfig)
 	if err != nil {
 		return nil, errors.Wrapf(err, "build logger got err")
 	}
-	e.Use(LogrusMiddleware(stdLog))
+	// e.Use(LogrusMiddleware(slog))
 
 	// 配置tmpl渲染器
 	render, err := NewWisdomRenderer()
@@ -46,7 +45,7 @@ func NewHttpdServer(configFile string) (*Server, error) {
 
 	// 路由器配置，通过依赖注入方式实现
 	srvImpl := api.NewWisdomImpl(application.NewWisdomApp())
-	router, err := InitRouter(e, srvImpl)
+	router, err := RegisterRouterHandler(e, srvImpl)
 	if err != nil {
 		return nil, errors.Wrap(err, "init router got err")
 	}
@@ -54,7 +53,6 @@ func NewHttpdServer(configFile string) (*Server, error) {
 		Cfg:    cfg,
 		echo:   e,
 		Router: router,
-		stdLog: stdLog,
 	}
 
 	return svr, nil

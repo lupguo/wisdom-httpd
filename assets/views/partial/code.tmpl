@@ -9,7 +9,7 @@
             // http server
             addr := ":1666"
             log.Debugf("listen: http://127.0.0.1%v", addr)
-            e.Logger.Fatal(e.Start(addr))
+            log.Fatal(e.Start(addr))
             }
         </code>
     </pre>
