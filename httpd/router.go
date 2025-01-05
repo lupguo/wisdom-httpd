@@ -73,35 +73,29 @@ func (r *Router) build() error {
 // 通过注入RouteHandle
 func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err error) {
 	return func(c echo.Context) (err error) {
+		start := time.Now()
 		ctx := util.NewContext(c)
 
-		// reqBody deal
-		reqbody, err := io.ReadAll(ctx.Request().Body)
+		// RequestBody
+		req, reqMap, err := getHTTPBodyEntry(ctx)
 		if err != nil {
-			return err
-		}
-
-		var reqm map[string]any
-		err = json.Unmarshal(reqbody, &reqm)
-		if err != nil {
-			return errors.Wrap(err, "router json unmarshal reqbody err")
+			return errors.Wrap(err, "getHTTPBodyEntry got err")
 		}
 
 		// Biz 请求+响应日志打印
 		var rsp any
-		start := time.Now()
 		defer func(c *util.Context, start time.Time) {
 			fields := map[string]any{
 				log.FieldError:   err,
 				log.FieldElapsed: time.Since(start),
-				log.FieldReq:     shim.ToJsonString(reqm),
+				log.FieldReq:     shim.ToJsonString(reqMap),
 				log.FieldRsp:     shim.ToJsonString(rsp),
 			}
 			log.WithFilesInfoContextf(fields, ctx, "%s", "")
 		}(ctx, start)
 
 		// Biz 处理
-		rsp, err = h.HandleFunc(ctx, reqbody)
+		rsp, err = h.HandleFunc(ctx, req)
 		if err != nil {
 			return log.WrapErrorContextf(ctx, err, "h.HandleFunc got err")
 		}
@@ -120,4 +114,25 @@ func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err erro
 
 		return nil
 	}
+}
+
+// 获取getHTTPBodyEntry请求的信息
+func getHTTPBodyEntry(ctx *util.Context) ([]byte, map[string]any, error) {
+	if ctx.Request().Method != http.MethodPost {
+		return nil, nil, nil
+	}
+
+	// reqBody deal
+	body, err := io.ReadAll(ctx.Request().Body)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "read HTTP request body got err")
+	}
+
+	var m map[string]any
+	err = json.Unmarshal(body, &m)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "router json unmarshal reqbody err")
+	}
+
+	return body, m, nil
 }
