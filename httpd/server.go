@@ -37,7 +37,7 @@ func NewHttpdServer(configFile string) (*Server, error) {
 	// e.Use(LogrusMiddleware(slog))
 
 	// 配置tmpl渲染器
-	render, err := NewWisdomRenderer()
+	render, err := NewHTMLRenderer()
 	if err != nil {
 		return nil, errors.Wrap(err, "build wisdom template got err")
 	}

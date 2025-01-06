@@ -77,9 +77,9 @@ func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err erro
 		ctx := util.NewContext(c)
 
 		// RequestBody
-		req, reqMap, err := getHTTPBodyEntry(ctx)
+		req, reqMap, err := getHTTPReqEntry(ctx)
 		if err != nil {
-			return errors.Wrap(err, "getHTTPBodyEntry got err")
+			return errors.Wrap(err, "getHTTPReqEntry got err")
 		}
 
 		// Biz 请求+响应日志打印
@@ -99,40 +99,52 @@ func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err erro
 		if err != nil {
 			return log.WrapErrorContextf(ctx, err, "h.HandleFunc got err")
 		}
-		c.Set("rsp", rsp)
+
+		// header log
+		// log.InfoContextf(ctx, "header => %s ", shim.ToJsonString(ctx.Request().Header))
 
 		// Biz 结果响应
 		switch c.Request().Header.Get("Content-Type") {
 		case "application/json":
 			return c.JSON(http.StatusOK, rsp)
-		case "text/html":
-			if h.TemplateName == "" {
-				return errors.Errorf("URI[%s] html template name is empty", h.URI)
-			}
+		default:
+			// text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
 			return c.Render(http.StatusOK, h.TemplateName, rsp)
 		}
 
-		return nil
 	}
 }
 
 // 获取getHTTPBodyEntry请求的信息
-func getHTTPBodyEntry(ctx *util.Context) ([]byte, map[string]any, error) {
-	if ctx.Request().Method != http.MethodPost {
-		return nil, nil, nil
-	}
-
-	// reqBody deal
-	body, err := io.ReadAll(ctx.Request().Body)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "read HTTP request body got err")
-	}
-
+func getHTTPReqEntry(ctx *util.Context) (any, map[string]any, error) {
 	var m map[string]any
-	err = json.Unmarshal(body, &m)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "router json unmarshal reqbody err")
+	switch ctx.Request().Method {
+	case http.MethodGet:
+		b := ctx.QueryParams()
+		if len(b) == 0 {
+			return nil, nil, nil
+		}
+		m = make(map[string]any, len(b))
+		for k, v := range b {
+			m[k] = v
+		}
+
+		return b, m, nil
+	case http.MethodPost:
+		b, err := io.ReadAll(ctx.Request().Body)
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "read HTTP request body got err")
+		}
+
+		if b != nil {
+			err = json.Unmarshal(b, &m)
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "router json unmarshal reqbody err")
+			}
+		}
+
+		return b, m, nil
 	}
 
-	return body, m, nil
+	return nil, nil, errors.Errorf("invalid http method: %s", ctx.Request().Method)
 }

@@ -1,21 +1,21 @@
-### 默认wisdom随机展示
-GET http://{{host}}/wisdom
-Accept: text/html
+### 首页
+GET http://{{host}}
+Content-Type: application/json
+
+### 首页HTML
+GET http://{{host}}
+Content-Type: text/html
 
 ### 预览
 GET http://{{host}}/wisdom?preview=1
 Accept: application/json
 
-### json响应
-GET http://{{host}}/api/wisdom
-Accept: application/json
-
-### 首页
-GET http://{{host}}
-Content-Type: application/json
+### 随机展示
+GET http://{{host}}/wisdom
+Accept: text/html
 
 ### POST 首页
-POST http://{{host}}?startTime=20240101&type=custom
+POST http://{{host}}/wisdom
 Content-Type: application/json
 
 {
@@ -25,4 +25,5 @@ Content-Type: application/json
     },
     "age": 36
 }
+
 
