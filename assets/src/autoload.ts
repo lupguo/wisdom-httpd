@@ -30,12 +30,9 @@ function refreshWisdom() {
     console.log("Refreshing wisdom...");
     fetchWisdom().then(function (data) {
         // 从数据中提取句子并更新模板
-        if (data && data.status === "success" && data.data && data.data.PageData) {
-            const sentence = data.data.PageData.sentence;
-            updateTemplate(sentence);
-        } else {
-            console.error("Invalid data structure:", data);
-        }
+        console.info("rsp data:", data);
+        updateTemplate(data.sentence);
+
     }).catch(function (err) {
         console.error("Got error: " + err);
     });

@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -64,7 +65,9 @@ func NewServerLog(cfg *Config) error {
 }
 
 // `uuid=%s|method=%s|path=%s|status=%v|src_addr=%s|req=>%s|elapsed=%s`
-func withCtxFiles(ctx *util.Context) *logrus.Entry {
+func withCtxFiles(ctx context.Context) *logrus.Entry {
+	utilCtx := ctx.(*util.Context)
+
 	// 日志点
 	_, file, line, ok := runtime.Caller(3)
 	if !ok {
@@ -72,12 +75,12 @@ func withCtxFiles(ctx *util.Context) *logrus.Entry {
 		line = 0
 	}
 	return srvLog.WithFields(logrus.Fields{
-		FieldTraceId: ctx.TraceId(),
-		FieldPath:    ctx.Path(),
+		FieldTraceId: utilCtx.TraceId(),
+		FieldPath:    utilCtx.Path(),
 		FieldFile:    fmt.Sprintf("%s:%d", file, line),
-		FieldMethod:  ctx.Request().Method,
-		FieldSrcAddr: ctx.RealIP(),
-		FieldDstAddr: ctx.Request().Host,
+		FieldMethod:  utilCtx.Request().Method,
+		FieldSrcAddr: utilCtx.RealIP(),
+		FieldDstAddr: utilCtx.Request().Host,
 	})
 }
 
@@ -110,12 +113,12 @@ func Infof(format string, v ...any) {
 }
 
 // InfoContextf 上下文打印信息
-func InfoContextf(ctx *util.Context, format string, v ...any) {
+func InfoContextf(ctx context.Context, format string, v ...any) {
 	withCtxFiles(ctx).Infof(format, v...)
 }
 
 // WithFilesInfoContextf 携带其他参数打印
-func WithFilesInfoContextf(fields map[string]any, ctx *util.Context, format string, v ...interface{}) {
+func WithFilesInfoContextf(fields map[string]any, ctx context.Context, format string, v ...interface{}) {
 	logFields := make(map[string]any)
 	for k, v := range fields {
 		logFields[k] = v
@@ -129,12 +132,12 @@ func Errorf(format string, v ...any) {
 }
 
 // ErrorContextf 错误附带上下文打印信息
-func ErrorContextf(ctx *util.Context, format string, v ...any) {
+func ErrorContextf(ctx context.Context, format string, v ...any) {
 	withCtxFiles(ctx).Errorf(format, v...)
 }
 
 // WrapErrorContextf 打印日志并返回wrap的错误码信息
-func WrapErrorContextf(ctx *util.Context, err error, format string, v ...any) error {
+func WrapErrorContextf(ctx context.Context, err error, format string, v ...any) error {
 	e := errors.Wrapf(err, format, v)
 	withCtxFiles(ctx).Errorf(format, v...)
 	return e

@@ -24,6 +24,11 @@ type Context struct {
 	err  error
 }
 
+func (c *Context) Value(key any) any {
+	// TODO implement me
+	panic("implement me")
+}
+
 func (c *Context) Deadline() (deadline time.Time, ok bool) {
 	return
 }
@@ -34,14 +39,6 @@ func (c *Context) Done() <-chan struct{} {
 
 func (c *Context) Err() error {
 	return c.err
-}
-
-// Value 取ctx上的值
-func (c *Context) Value(key string) any {
-	if v, ok := c.meta[key]; ok {
-		return v
-	}
-	return nil
 }
 
 // TraceId trace_id

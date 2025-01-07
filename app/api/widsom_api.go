@@ -1,32 +1,35 @@
 package api
 
 import (
-	"github.com/lupguo/go-shim/shim"
+	"context"
+	"encoding/json"
+
 	"github.com/lupguo/wisdom-httpd/app/application"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
+	"github.com/lupguo/wisdom-httpd/app/domain/entity/crp"
 	"github.com/lupguo/wisdom-httpd/internal/log"
-	"github.com/lupguo/wisdom-httpd/internal/util"
+	"github.com/pkg/errors"
 )
 
 // WisdomHandler 接口初始化
 type WisdomHandler struct {
-	app application.WisdomAppInf
+	app application.IAppWisdom
 }
 
 // NewWisdomImpl 初始化wisdom实现
-func NewWisdomImpl(app application.WisdomAppInf) *WisdomHandler {
+func NewWisdomImpl(app application.IAppWisdom) *WisdomHandler {
 	return &WisdomHandler{app: app}
 }
 
 // Index 首页渲染
-func (h *WisdomHandler) Index(ctx *util.Context, req any) (rsp any, err error) {
+func (h *WisdomHandler) Index(ctx context.Context, req []byte) (rsp any, err error) {
 	wisdom, err := h.app.GetRandOneWisdom(nil, false)
 	if err != nil {
 		return nil, err
 	}
 
-	rsp = &entity.IndexPageData{
-		User:    &entity.User{Name: "TerryRod"},
+	rsp = &crp.PageDataIndexRsp{
+		User:    &crp.User{Name: "Rod"},
 		Wisdom:  wisdom.Sentence,
 		Content: "wisdom page index content",
 	}
@@ -34,29 +37,41 @@ func (h *WisdomHandler) Index(ctx *util.Context, req any) (rsp any, err error) {
 	return rsp, nil
 }
 
-// GetOneWisdom 名言处理
-func (h *WisdomHandler) GetOneWisdom(ctx *util.Context, _ any) (rsp any, err error) {
-	req := &entity.GetOneWisdomReq{}
-	if err = ctx.Bind(&req); err != nil {
+// GetOneWisdom 获取一条名言金句
+func (h *WisdomHandler) GetOneWisdom(ctx context.Context, reqData []byte) (rsp any, err error) {
+	req := &crp.GetOneWisdomReq{}
+	if err = json.Unmarshal(reqData, &req); err != nil {
 		return nil, err
 	}
 
 	// 获取wisdom
-	log.Infof("req => %s", shim.ToJsonString(req))
 	wisdom, err := h.app.GetRandOneWisdom(nil, req.Preview)
 	if err != nil {
 		return nil, log.WrapErrorContextf(ctx, err, "fn[GetOneWisdom] get rand wisdom got an err")
 	}
-	rsp = &entity.GetOneWisdomRsp{
+
+	rsp = &entity.Wisdom{
+		WisdomNo: "0x3FBA",
 		Sentence: wisdom.Sentence,
+		Speaker:  "鲁迅",
+		ReferURL: "https://tkstorm.com",
+		Image:    "https://localhost:1666/imgs/code.png",
 	}
 
-	log.Infof("rsp <= %s", shim.ToJsonString(rsp))
 	return rsp, nil
 }
 
 // SaveWisdom 保存
-func (h *WisdomHandler) SaveWisdom(ctx *util.Context, _ any) (rsp any, err error) {
+func (h *WisdomHandler) SaveWisdom(ctx context.Context, reqData []byte) (rsp any, err error) {
+	req := &crp.SaveWisdomReq{}
+	if err = json.Unmarshal(reqData, &req); err != nil {
+		return nil, errors.Wrap(err, "handle unmarshal req data got err")
+	}
 
-	return nil, nil
+	err = h.app.SaveOneWisdom(ctx, entity.NewWisdom(req))
+	if err != nil {
+		return nil, errors.Wrap(err, "handle save wisdom got err")
+	}
+
+	return &crp.SaveWisdomRsp{}, nil
 }

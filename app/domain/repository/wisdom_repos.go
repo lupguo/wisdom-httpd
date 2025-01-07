@@ -1,32 +1,34 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 )
 
-// WisdomFileRepos 至理名言仓储接口
-type WisdomFileRepos interface {
+// IReposWisdomJsonFile 至理名言仓储接口
+type IReposWisdomJsonFile interface {
 	// ReadWisdom 读取wisdom内容
 	ReadWisdom(filename string) ([]*entity.Wisdom, error)
 }
 
-// WisdomDBRepos DB仓储接口要实现的能力
-type WisdomDBRepos interface {
+// IReposWisdomDB DB仓储接口要实现的能力
+type IReposWisdomDB interface {
 	// InsertWisdom 批量插入到DB表中
-	InsertWisdom(list []*entity.Wisdom) error
+	InsertWisdom(ctx context.Context, wisdoms []*entity.Wisdom) error
 
 	// SelectWisdom 查询指定ID的名言信息
-	SelectWisdom(qryCond *entity.Wisdom) (*entity.Wisdom, error)
+	SelectWisdom(ctx context.Context, qryCond *entity.WisdomQryCond, pageLimit *entity.PageLimit) ([]*entity.Wisdom, error)
 
 	// UpdateWisdom 更新
-	UpdateWisdom(updEnt *entity.Wisdom, qryCond *entity.Wisdom) error
+	UpdateWisdom(ctx context.Context, updEntry *entity.WisdomUpdEntry, qryCond *entity.WisdomQryCond) error
 
 	// DeleteWisdom 删除
-	DeleteWisdom(qryCond *entity.Wisdom) error
+	DeleteWisdom(ctx context.Context, qryCond *entity.WisdomQryCond) error
 }
 
-// WisdomCacheRepos 缓存仓储接口
-type WisdomCacheRepos interface {
+// IReposWisdomCache 缓存仓储接口
+type IReposWisdomCache interface {
 	// ReadWisdom 读取
 	ReadWisdom(key string) (*entity.Wisdom, error)
 
@@ -37,8 +39,8 @@ type WisdomCacheRepos interface {
 	DelWisdom(key string) error
 }
 
-// WisdomOpenAIRepos 关于OpenAI仓储层要实现能力
-type WisdomOpenAIRepos interface {
+// IReposWisdomOpenAI 关于OpenAI仓储层要实现能力
+type IReposWisdomOpenAI interface {
 	// GenerateAIWisdom 通过AI生成wisdom信息
 	GenerateAIWisdom() ([]*entity.Wisdom, error)
 }
