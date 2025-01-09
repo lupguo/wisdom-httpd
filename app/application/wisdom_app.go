@@ -27,8 +27,8 @@ type WisdomApp struct {
 }
 
 // NewWisdomApp 初始化Wisdom的APP
-func NewWisdomApp() *WisdomApp {
-	return &WisdomApp{}
+func NewWisdomApp(wisdomSvr service.IServiceWisdom) *WisdomApp {
+	return &WisdomApp{wisdomSvr: wisdomSvr}
 }
 
 // SaveOneWisdom 保存一条wisdom记录到DB中

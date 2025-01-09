@@ -1,0 +1,33 @@
+listen: "127.0.0.1:1666"
+root: "/data/projects/github.com/lupguo/wisdom-httpd"
+log:
+  output: console # console 或者 file
+  output_file: /tmp/wisdom_app.log
+  log_level: "debug" # debug, info , error
+  log_format: '{"time":"${time_custom}","id":"${id}","remote_ip":"${remote_ip}","host":"${host}","method":"${method}","uri":"${uri}","user_agent":"${user_agent}","status":${status},"error":"${error}","latency":${latency},"latency_human":"${latency_human}"`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}'
+  log_time_format: '2006-01-02 15:04:05.000'
+assets:
+  view_path: "assets/views"
+  view_parse_files:
+    files:
+      - "index.tmpl"
+      - "wisdom.tmpl"
+    glob:
+      - "main/*.tmpl"
+      - "partial/*.tmpl"
+public: "./dist"
+wisdom:
+  file_path: "./wisdom.json"
+  refresh_interval: 30s
+db:
+  dsn: ""  # [user[:password]@][net[(addr)]]/dbname[?param1=value1&paramN=valueN]
+  conn_max_lifetime: 300
+  conn_max_idle_time: 300
+  max_idle_conns: 10
+  max_open_conns: 50
+  logger_config:
+    log_file: "/tmp/wisdom_app.log"
+    log_level: 4
+    slow_threshold: "200ms"
+    colorful: false
+

@@ -94,13 +94,13 @@ func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err erro
 				log.FieldReq:     shim.ToJsonString(reqMap),
 				log.FieldRsp:     shim.ToJsonString(rsp),
 			}
-			log.WithFilesInfoContextf(fields, ctx, "%s", "")
+			log.WithContext(ctx).WithFields(fields).Print()
 		}(ctx, start)
 
 		// Biz 处理
 		rsp, err = h.APIHandleFunc(ctx, reqData)
 		if err != nil {
-			return log.WrapErrorContextf(ctx, err, "h.APIHandleFunc got err")
+			return errors.Wrapf(err, "api handler[%s] got err", h.URI)
 		}
 
 		// header log

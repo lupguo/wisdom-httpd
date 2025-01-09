@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/lupguo/go-shim/shim"
+	"github.com/lupguo/go-shim/x/mysqlx"
 	"github.com/lupguo/wisdom-httpd/internal/log"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
@@ -25,12 +26,13 @@ type AssetConfig struct {
 
 // Config App配置
 type Config struct {
-	Root      string        `json:"root" yaml:"root"`
-	Listen    string        `json:"listen" yaml:"listen"`
-	LogConfig *log.Config   `json:"log" yaml:"log"`
-	Assets    *AssetConfig  `json:"assets" yaml:"assets"`
-	Public    string        `json:"public" yaml:"public"`
-	Wisdom    *WisdomConfig `json:"wisdom" yaml:"wisdom"`
+	Root      string           `json:"root" yaml:"root"`
+	Listen    string           `json:"listen" yaml:"listen"`
+	LogConfig *log.Config      `json:"log" yaml:"log"`
+	Assets    *AssetConfig     `json:"assets" yaml:"assets"`
+	Public    string           `json:"public" yaml:"public"`
+	Wisdom    *WisdomConfig    `json:"wisdom" yaml:"wisdom"`
+	DBConfig  *mysqlx.DBConfig `yaml:"db"`
 }
 
 // 系统默认配置
@@ -63,4 +65,9 @@ func PublicPath() string {
 // GetWisdomSentenceFilePath 获取wisdom文件
 func GetWisdomSentenceFilePath() string {
 	return cfg.Wisdom.FilePath
+}
+
+// GetDBConfig 从yaml获取DBConfig的配置信息
+func GetDBConfig() (*mysqlx.DBConfig, error) {
+	return cfg.DBConfig, nil
 }

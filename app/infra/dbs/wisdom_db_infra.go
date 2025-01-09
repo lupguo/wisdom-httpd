@@ -5,6 +5,7 @@ import (
 
 	"github.com/lupguo/go-shim/x/mysqlx"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
+	"github.com/lupguo/wisdom-httpd/app/infra/conf"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -14,29 +15,29 @@ type WisdomDB struct {
 	db *gorm.DB
 }
 
+// NewWisdomDB 新创建DB
+func NewWisdomDB() (*WisdomDB, error) {
+
+	// db配置
+	dbCfg, err := conf.GetDBConfig()
+	if err != nil {
+		return nil, errors.Wrap(err, "conf.GetDBConfig() got err")
+	}
+
+	// 初始化
+	db, err := mysqlx.NewGormDB(dbCfg)
+	if err != nil {
+		return nil, errors.Wrap(err, "mysqlx.NewGormDB got err")
+	}
+	return &WisdomDB{db: db}, nil
+}
+
 // InsertWisdom 批量插入名言到数据库
 func (w *WisdomDB) InsertWisdom(ctx context.Context, wisdoms []*entity.Wisdom) error {
 	if err := w.db.Create(wisdoms).Error; err != nil {
 		return errors.Wrap(err, "failed to insert wisdom")
 	}
 	return nil
-}
-
-// NewWisdomDB 新创建DB
-func NewWisdomDB(dbDSN string) (*WisdomDB, error) {
-	// todo update
-	db, err := mysqlx.NewGormDB(&mysqlx.DBConfig{
-		DSN:             dbDSN,
-		ConnMaxLifetime: "",
-		ConnMaxIdleTime: "",
-		MaxIdleConns:    0, // 无限制
-		MaxOpenConns:    0, // 无限制
-		LoggerConfig:    nil,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "mysqlx.NewGormDB")
-	}
-	return &WisdomDB{db: db}, nil
 }
 
 // SelectWisdom 查询指定条件的名言信息

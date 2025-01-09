@@ -19,6 +19,30 @@ const (
 	OutputTypeConsole OutputType = `console`
 )
 
+// 日志字段定义
+const (
+	FieldTime    = `time`     // 时间
+	FieldPath    = `path`     // 路径
+	FieldMethod  = `method`   // 方法
+	FieldSrcAddr = `src_addr` // 来源地址
+	FieldDstAddr = `dst_addr` // 目标地址
+	FieldFile    = `file`     // 日志文件
+	FieldTraceId = `trace_id` // TraceId
+	FieldLevel   = `level`    // 日志等级
+	FieldElapsed = `elapsed`  // 请求耗时
+	FieldMsg     = `msg`      // 日志消息
+	FieldError   = `err`      // 错误信息
+	FieldReq     = `req`      // 请求参数
+	FieldRsp     = `rsp`      // 响应参数
+)
+
+// FieldSort 排序字段
+var FieldSort = []string{
+	FieldLevel, FieldTime, FieldTraceId, FieldSrcAddr, FieldDstAddr, FieldMethod, FieldPath, FieldElapsed,
+	FieldFile, FieldReq, FieldRsp,
+	FieldMsg, FieldError,
+}
+
 // Config 日志配置
 type Config struct {
 	Output        OutputType `json:"output" yaml:"output"`
@@ -28,18 +52,29 @@ type Config struct {
 	LogTimeFormat string     `json:"log_time_format" yaml:"log_time_format"`
 }
 
-// 服务日志
-var srvLog *logrus.Logger
+type IServerLogger interface {
+	// WithContext WithCtxFile日志携带上ctx内关键信息
+	WithContext(ctx context.Context) *logrus.Entry
+}
 
-// NewServerLog 初始化日志输出
-func NewServerLog(cfg *Config) error {
+// 服务日志
+var srvLog *SrvLogger
+
+type SrvLogger struct {
+	*logrus.Logger
+}
+
+// InitServerLog 初始化日志输出
+func InitServerLog(cfg *Config) error {
 	// 注入logrus
-	srvLog = &logrus.Logger{
-		Out:          os.Stderr,
-		Hooks:        make(logrus.LevelHooks),
-		Level:        logrus.InfoLevel,
-		ExitFunc:     os.Exit,
-		ReportCaller: false,
+	srvLog = &SrvLogger{
+		Logger: &logrus.Logger{
+			Out:          os.Stderr,
+			Hooks:        make(logrus.LevelHooks),
+			Level:        logrus.InfoLevel,
+			ExitFunc:     os.Exit,
+			ReportCaller: false,
+		},
 	}
 
 	// 设置log等级
@@ -64,8 +99,8 @@ func NewServerLog(cfg *Config) error {
 	return nil
 }
 
-// `uuid=%s|method=%s|path=%s|status=%v|src_addr=%s|req=>%s|elapsed=%s`
-func withCtxFiles(ctx context.Context) *logrus.Entry {
+// WithContext `uuid=%s|method=%s|path=%s|status=%v|src_addr=%s|req=>%s|elapsed=%s`
+func (l *SrvLogger) WithContext(ctx context.Context) *logrus.Entry {
 	utilCtx := ctx.(*util.Context)
 
 	// 日志点
@@ -74,7 +109,7 @@ func withCtxFiles(ctx context.Context) *logrus.Entry {
 		file = "???"
 		line = 0
 	}
-	return srvLog.WithFields(logrus.Fields{
+	return l.WithFields(logrus.Fields{
 		FieldTraceId: utilCtx.TraceId(),
 		FieldPath:    utilCtx.Path(),
 		FieldFile:    fmt.Sprintf("%s:%d", file, line),
@@ -84,27 +119,8 @@ func withCtxFiles(ctx context.Context) *logrus.Entry {
 	})
 }
 
-const (
-	FieldTime    = `time`     // 时间
-	FieldPath    = `path`     // 路径
-	FieldMethod  = `method`   // 方法
-	FieldSrcAddr = `src_addr` // 来源地址
-	FieldDstAddr = `dst_addr` // 目标地址
-	FieldFile    = `file`     // 日志文件
-	FieldTraceId = `trace_id` // TraceId
-	FieldLevel   = `level`    // 日志等级
-	FieldElapsed = `elapsed`  // 请求耗时
-	FieldMsg     = `msg`      // 日志消息
-	FieldError   = `err`      // 错误信息
-	FieldReq     = `req`      // 请求参数
-	FieldRsp     = `rsp`      // 响应参数
-)
-
-// FieldSort 排序字段
-var FieldSort = []string{
-	FieldLevel, FieldTime, FieldTraceId, FieldSrcAddr, FieldDstAddr, FieldMethod, FieldPath, FieldElapsed,
-	FieldFile, FieldReq, FieldRsp,
-	FieldMsg, FieldError,
+func WithContext(ctx context.Context) *logrus.Entry {
+	return srvLog.WithContext(ctx)
 }
 
 // Infof 上下文打印信息
@@ -114,16 +130,7 @@ func Infof(format string, v ...any) {
 
 // InfoContextf 上下文打印信息
 func InfoContextf(ctx context.Context, format string, v ...any) {
-	withCtxFiles(ctx).Infof(format, v...)
-}
-
-// WithFilesInfoContextf 携带其他参数打印
-func WithFilesInfoContextf(fields map[string]any, ctx context.Context, format string, v ...interface{}) {
-	logFields := make(map[string]any)
-	for k, v := range fields {
-		logFields[k] = v
-	}
-	withCtxFiles(ctx).WithFields(logFields).Infof(format, v...)
+	srvLog.WithContext(ctx).Infof(format, v...)
 }
 
 // Errorf 错误输出
@@ -133,12 +140,21 @@ func Errorf(format string, v ...any) {
 
 // ErrorContextf 错误附带上下文打印信息
 func ErrorContextf(ctx context.Context, format string, v ...any) {
-	withCtxFiles(ctx).Errorf(format, v...)
+	srvLog.WithContext(ctx).Errorf(format, v...)
 }
 
-// WrapErrorContextf 打印日志并返回wrap的错误码信息
-func WrapErrorContextf(ctx context.Context, err error, format string, v ...any) error {
-	e := errors.Wrapf(err, format, v)
-	withCtxFiles(ctx).Errorf(format, v...)
+// Fatalf 严重错误，直接退出
+func Fatalf(format string, v ...any) {
+	srvLog.Fatalf(format, v...)
+}
+
+// WrapAndLogErrorf 打印日志并返回wrap的错误码信息
+func WrapAndLogErrorf(ctx context.Context, err error, format string, v ...any) error {
+	// warp err
+	e := errors.Wrapf(err, format, v...)
+
+	// log err
+	srvLog.WithContext(ctx).Error(e)
+
 	return e
 }

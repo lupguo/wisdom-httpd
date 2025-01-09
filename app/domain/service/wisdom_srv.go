@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
-	"github.com/lupguo/wisdom-httpd/app/domain/repository"
+	"github.com/lupguo/wisdom-httpd/app/domain/repos"
 	"github.com/pkg/errors"
 )
 
@@ -22,7 +22,12 @@ type IServiceWisdom interface {
 
 // WisdomService Wisdom服务依赖的基础设施仓储接口
 type WisdomService struct {
-	dbsInfra repository.IReposWisdomDB
+	dbsInfra repos.IReposWisdomDB
+}
+
+// NewWisdomService 初始化WisdomService
+func NewWisdomService(dbsInfra repos.IReposWisdomDB) *WisdomService {
+	return &WisdomService{dbsInfra: dbsInfra}
 }
 
 // GetWisdoms 按条件获取一批Wisdoms

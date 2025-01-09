@@ -25,8 +25,10 @@ type Context struct {
 }
 
 func (c *Context) Value(key any) any {
-	// TODO implement me
-	panic("implement me")
+	if v, ok := c.meta[key.(string)]; ok {
+		return v
+	}
+	return nil
 }
 
 func (c *Context) Deadline() (deadline time.Time, ok bool) {
