@@ -8,7 +8,7 @@ export let globalConfig: Config; // 初始为 null，表示尚未加载
 
 // 在 JavaScript 中加载配置
 async function loadConfig(): Promise<Config> {
-    const response = await fetch('/config/refresh.json'); // 确保路径正确
+    const response = await fetch('/dist/config/refresh.json'); // 确保路径正确
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }

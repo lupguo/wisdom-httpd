@@ -1,13 +1,23 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const webpack = require('webpack')
 
 module.exports = {
-    mode: "development",
     entry: './assets/src/index.ts', // 入口文件
     output: {
-        filename: 'index.js', // 输出文件名
+        filename: 'bundle.js', // 输出文件名
         path: path.resolve(__dirname, 'dist'), // 输出路径
+        publicPath: '/dist', // 这对 HMR 是必要的
+    },
+    devServer: {
+        static: {
+            directory: path.join(__dirname, 'dist'), // 提供静态文件的目录
+        },
+        hot: true, // 启用热模块替换
+        port: 3000,
+        open: true, // 启动后自动打开浏览器
     },
     resolve: {
         extensions: ['.ts', '.js'], // 支持的文件扩展名
@@ -36,13 +46,20 @@ module.exports = {
             },
         ],
     },
+    optimization: {
+        minimize: true,
+        minimizer: [new TerserPlugin()],
+    },
+
+    mode: 'development', // 开发模式
     plugins: [
+        new webpack.HotModuleReplacementPlugin(), // Add HMR plugin
         new MiniCssExtractPlugin({
             filename: 'css/[name].css',
         }),
         new CopyWebpackPlugin({
             patterns: [
-                {from: 'assets/src/img/*', to: 'img/[name][ext]'},
+                {from: 'assets/src/imgs/*', to: 'imgs/[name][ext]'},
                 {from: 'assets/src/css/*.css', to: 'css/[name].css'},
                 {from: 'assets/src/config/*.json', to: 'config/[name].json'},
             ],
