@@ -1,11 +1,11 @@
 package entity
 
 import (
-	"crypto/rand"
+	"crypto/sha256"
 	"fmt"
-	"math/big"
 
 	"github.com/lupguo/wisdom-httpd/app/domain/entity/crp"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
@@ -20,14 +20,18 @@ type Wisdom struct {
 }
 
 // NewWisdom 初始化一个wisdom
-func NewWisdom(p *crp.SaveWisdomReq) *Wisdom {
+func NewWisdom(p *crp.SaveWisdomReq) (*Wisdom, error) {
+	if err := p.Validate(); err != nil {
+		return nil, errors.Wrap(err, "create wisdom validation fail")
+	}
+
 	return &Wisdom{
-		WisdomNo: GenerateRandomHex(),
+		WisdomNo: GenerateRandomHex(p.Sentence),
 		Sentence: p.Sentence,
 		Speaker:  p.Speaker,
 		ReferURL: p.ReferURL,
 		Image:    "", // todo AI
-	}
+	}, nil
 }
 
 // TableName 名言表
@@ -48,10 +52,17 @@ type WisdomUpdEntry struct {
 	Image string
 }
 
-// GenerateRandomHex 生成一个随机数，范围在0到65535之间（即16进制的FFFF）
-func GenerateRandomHex() string {
-	n, _ := rand.Int(rand.Reader, big.NewInt(1e8))
-	return fmt.Sprintf("0x%0X", n)
+// GenerateRandomHex 返回字符串s压缩对应的16进制字字符串
+// 1. 对整个串生成Hash，Hash串转16进制
+// 2. 取前N个Hash串内容
+func GenerateRandomHex(s string) string {
+	// 生成哈希值
+	hash := sha256.New()
+	hash.Write([]byte(s))
+	hashBytes := hash.Sum(nil)
+
+	// 转换为16进制字符串并截取前4个字符
+	return fmt.Sprintf("0x%0X", hashBytes[:3])
 }
 
 // WisdomList 配置列表

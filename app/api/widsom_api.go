@@ -67,12 +67,11 @@ func (h *WisdomHandler) SaveWisdom(ctx context.Context, reqData []byte) (rsp any
 		return nil, errors.Wrap(err, "fn[SaveWisdom] handle unmarshal req data got err")
 	}
 
-	// 基本检测
-	if err = req.Validate(); err != nil {
-		return nil, errors.Wrap(err, "fn[SaveWisdom] handle validate req data got err")
+	wisdom, err := entity.NewWisdom(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "fn[SaveWisdom] new wisdom got got err")
 	}
-
-	err = h.app.SaveOneWisdom(ctx, entity.NewWisdom(req))
+	err = h.app.SaveOneWisdom(ctx, wisdom)
 	if err != nil {
 		return nil, errors.Wrap(err, "fn[SaveWisdom] handle save wisdom got err")
 	}
