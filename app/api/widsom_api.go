@@ -14,17 +14,21 @@ import (
 
 // WisdomHandler 接口初始化
 type WisdomHandler struct {
-	app application.IAppWisdom
+	wisdomApp application.IAppWisdom
+	appTools  *application.ToolsApp
 }
 
 // NewWisdomHandlerImpl 初始化wisdom实现
-func NewWisdomHandlerImpl(app application.IAppWisdom) *WisdomHandler {
-	return &WisdomHandler{app: app}
+func NewWisdomHandlerImpl(wisdomApp application.IAppWisdom, toolApp *application.ToolsApp) *WisdomHandler {
+	return &WisdomHandler{
+		wisdomApp: wisdomApp,
+		appTools:  toolApp,
+	}
 }
 
 // Index 首页渲染
 func (h *WisdomHandler) Index(ctx context.Context, req []byte) (rsp any, err error) {
-	wisdom, err := h.app.GetRandOneWisdomFromJsonFile(nil, false)
+	wisdom, err := h.wisdomApp.GetRandOneWisdomFromJsonFile(nil, false)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +56,7 @@ func (h *WisdomHandler) GetWisdom(ctx context.Context, reqData []byte) (rsp any,
 		Random:    req.IsRandom(),
 	}
 
-	wisdom, err := h.app.GetWisdomByCond(ctx, qryCond)
+	wisdom, err := h.wisdomApp.GetWisdomByCond(ctx, qryCond)
 	if err != nil {
 		return nil, errors.Wrap(err, "fn[GetWisdom] got err")
 	}
@@ -72,7 +76,7 @@ func (h *WisdomHandler) SaveWisdom(ctx context.Context, reqData []byte) (rsp any
 	if err != nil {
 		return nil, errors.Wrap(err, "fn[SaveWisdom] new wisdom got got err")
 	}
-	err = h.app.SaveOneWisdom(ctx, wisdom)
+	err = h.wisdomApp.SaveOneWisdom(ctx, wisdom)
 	if err != nil {
 		return nil, errors.Wrap(err, "fn[SaveWisdom] handle save wisdom got err")
 	}

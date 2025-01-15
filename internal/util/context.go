@@ -61,7 +61,7 @@ func (c *Context) GetHTTPReqEntry() (reqData []byte, err error) {
 	case http.MethodGet:
 		qryParams := c.QueryParams()
 		if len(qryParams) == 0 {
-			return nil, nil
+			return []byte(`{}`), nil
 		}
 
 		// QueryParam -> map[string]any

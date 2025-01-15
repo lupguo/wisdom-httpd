@@ -25,7 +25,8 @@ func NewWisdomAPIHandler() (*api.WisdomHandler, error) {
 	}
 	wisdomService := service.NewWisdomService(wisdomDB)
 	wisdomApp := application.NewWisdomApp(wisdomService)
-	wisdomHandler := api.NewWisdomHandlerImpl(wisdomApp)
+	toolsApp := application.NewToolsApp(wisdomService)
+	wisdomHandler := api.NewWisdomHandlerImpl(wisdomApp, toolsApp)
 	return wisdomHandler, nil
 }
 
@@ -35,7 +36,7 @@ func NewWisdomAPIHandler() (*api.WisdomHandler, error) {
 var apiSet = wire.NewSet(api.NewWisdomHandlerImpl)
 
 // app
-var appSet = wire.NewSet(wire.Bind(new(application.IAppWisdom), new(*application.WisdomApp)), application.NewWisdomApp)
+var appSet = wire.NewSet(wire.Bind(new(application.IAppWisdom), new(*application.WisdomApp)), application.NewWisdomApp, application.NewToolsApp)
 
 // srv
 var srvSet = wire.NewSet(wire.Bind(new(service.IServiceWisdom), new(*service.WisdomService)), service.NewWisdomService)

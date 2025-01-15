@@ -33,8 +33,12 @@ func registerRoutes(api *api.WisdomHandler) []*RouteHandler {
 		// 2024.12.31
 		{"GET", "/wisdom", api.GetWisdom, "wisdom.tmpl"},
 
+		// api
 		{"GET", "/api/wisdom", api.GetWisdom, ""},
 		{"POST", "/api/wisdom", api.SaveWisdom, ""},
+
+		// tool
+		{"GET", "/tool/refresh_to_db", api.ToolRefreshToDB, ""},
 	}
 }
 

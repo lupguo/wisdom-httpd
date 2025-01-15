@@ -66,8 +66,8 @@ func GenerateRandomHex(s string) string {
 	return fmt.Sprintf("0x%0X", hashBytes[:3])
 }
 
-// WisdomList 配置列表
-type WisdomList struct {
+// WisdomFileData 配置列表
+type WisdomFileData struct {
 	Preview   []string `json:"preview,omitempty"`
 	Sentences []string `json:"sentences,omitempty"`
 }
