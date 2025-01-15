@@ -45,6 +45,7 @@ type WisdomQryCond struct {
 	WisdomNos []string // 通过Wisdom WisdomNos
 	Keywords  string   // 关键字(句子、描述关键字模糊匹配)
 	Speaker   string
+	Random    bool // 是否随机数据
 }
 
 // WisdomUpdEntry 更新内容

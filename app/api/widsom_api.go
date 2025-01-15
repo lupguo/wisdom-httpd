@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/lupguo/go-shim/shim"
 	"github.com/lupguo/wisdom-httpd/app/application"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
 	"github.com/lupguo/wisdom-httpd/app/domain/entity/crp"
 	"github.com/lupguo/wisdom-httpd/internal/log"
-	"github.com/lupguo/wisdom-httpd/internal/util"
 	"github.com/pkg/errors"
 )
 
@@ -24,7 +24,7 @@ func NewWisdomHandlerImpl(app application.IAppWisdom) *WisdomHandler {
 
 // Index 首页渲染
 func (h *WisdomHandler) Index(ctx context.Context, req []byte) (rsp any, err error) {
-	wisdom, err := h.app.GetRandOneWisdom(nil, false)
+	wisdom, err := h.app.GetRandOneWisdomFromJsonFile(nil, false)
 	if err != nil {
 		return nil, err
 	}
@@ -38,26 +38,26 @@ func (h *WisdomHandler) Index(ctx context.Context, req []byte) (rsp any, err err
 	return rsp, nil
 }
 
-// GetOneWisdom 获取一条名言金句
-func (h *WisdomHandler) GetOneWisdom(ctx context.Context, _ []byte) (rsp any, err error) {
-	utilCtx := ctx.(*util.Context)
-	log.InfoContextf(ctx, "req => %v", utilCtx.Get("preview"))
+// GetWisdom 通过序号获取wisdom信息
+func (h *WisdomHandler) GetWisdom(ctx context.Context, reqData []byte) (rsp any, err error) {
+	req := &crp.GetOneWisdomReq{}
+	if err = json.Unmarshal(reqData, &req); err != nil {
+		return nil, errors.Wrap(err, "fn[GetWisdom] handle unmarshal req data got err")
+	}
 
-	// 获取wisdom
-	wisdom, err := h.app.GetRandOneWisdom(ctx, false)
+	qryCond := &entity.WisdomQryCond{
+		WisdomNos: req.GetNos(),
+		Keywords:  req.Keywords,
+		Speaker:   req.Speaker,
+		Random:    req.IsRandom(),
+	}
+
+	wisdom, err := h.app.GetWisdomByCond(ctx, qryCond)
 	if err != nil {
-		return nil, log.WrapAndLogErrorf(ctx, err, "fn[GetOneWisdom] get rand wisdom got an err")
+		return nil, errors.Wrap(err, "fn[GetWisdom] got err")
 	}
 
-	rsp = &entity.Wisdom{
-		WisdomNo: "0x3FBA",
-		Sentence: wisdom.Sentence,
-		Speaker:  "鲁迅",
-		ReferURL: "https://tkstorm.com",
-		Image:    "https://localhost:1666/imgs/code.png",
-	}
-
-	return rsp, nil
+	return wisdom, nil
 }
 
 // SaveWisdom 保存
@@ -67,6 +67,7 @@ func (h *WisdomHandler) SaveWisdom(ctx context.Context, reqData []byte) (rsp any
 		return nil, errors.Wrap(err, "fn[SaveWisdom] handle unmarshal req data got err")
 	}
 
+	// 创建wisdom
 	wisdom, err := entity.NewWisdom(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "fn[SaveWisdom] new wisdom got got err")
@@ -76,5 +77,10 @@ func (h *WisdomHandler) SaveWisdom(ctx context.Context, reqData []byte) (rsp any
 		return nil, errors.Wrap(err, "fn[SaveWisdom] handle save wisdom got err")
 	}
 
-	return &crp.SaveWisdomRsp{}, nil
+	log.InfoContextf(ctx, "save wisdom=>%s", shim.ToJsonString(wisdom))
+
+	return &crp.SaveWisdomRsp{
+		Code:     wisdom.WisdomNo,
+		Sentence: wisdom.Sentence,
+	}, nil
 }

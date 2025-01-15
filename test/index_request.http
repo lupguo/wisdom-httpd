@@ -15,15 +15,11 @@ GET http://{{host}}/wisdom
 Accept: text/html
 
 ### POST 首页
-POST http://{{host}}/wisdom
+POST http://{{host}}/api/wisdom
 Content-Type: application/json
 
 {
-    "user": {
-        "id": 100,
-        "like": "coding"
-    },
-    "age": 36
+    "Sentence": "hello4"
 }
 
 

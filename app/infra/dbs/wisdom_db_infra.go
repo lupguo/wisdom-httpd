@@ -42,7 +42,6 @@ func (w *WisdomDB) InsertWisdom(ctx context.Context, wisdoms []*entity.Wisdom) e
 
 // SelectWisdom 查询指定条件的名言信息
 func (w *WisdomDB) SelectWisdom(ctx context.Context, qryCond *entity.WisdomQryCond, pageLimit *entity.PageLimit) ([]*entity.Wisdom, error) {
-
 	query := w.db.Model(&entity.Wisdom{}).Debug()
 
 	// 根据条件构建查询
@@ -58,12 +57,12 @@ func (w *WisdomDB) SelectWisdom(ctx context.Context, qryCond *entity.WisdomQryCo
 	if qryCond.Keywords != "" {
 		query = query.Where("sentence LIKE ?", "%"+qryCond.Keywords+"%")
 	}
+	if qryCond.Random {
+		query = query.Order("RAND()")
+	}
 
 	// 随机选择指定条数的结果
 	if pageLimit != nil {
-		if pageLimit.Random {
-			query = query.Order("RAND()")
-		}
 		if pageLimit.Page > 0 && pageLimit.PageSize > 0 {
 			query.Offset((pageLimit.Page - 1) * pageLimit.PageSize).Limit(pageLimit.PageSize)
 		}

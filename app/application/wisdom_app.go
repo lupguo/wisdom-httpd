@@ -14,8 +14,11 @@ import (
 
 // IAppWisdom wisdom应用接口
 type IAppWisdom interface {
-	// GetRandOneWisdom 随机获取一条至理名言，如果是预览，默认给ID=1的首条
-	GetRandOneWisdom(ctx context.Context, isPreview bool) (*entity.Wisdom, error)
+	// GetRandOneWisdomFromJsonFile 随机获取一条至理名言，如果是预览，默认给ID=1的首条
+	GetRandOneWisdomFromJsonFile(ctx context.Context, isPreview bool) (*entity.Wisdom, error)
+
+	// GetWisdomByCond 按条件查询wisdom
+	GetWisdomByCond(ctx context.Context, qryCond *entity.WisdomQryCond) (*entity.Wisdom, error)
 
 	// SaveOneWisdom 保存一条Wisdom记录到DB
 	SaveOneWisdom(ctx context.Context, wisdom *entity.Wisdom) error
@@ -23,21 +26,38 @@ type IAppWisdom interface {
 
 // WisdomApp Wisdom应用
 type WisdomApp struct {
-	wisdomSvr service.IServiceWisdom
+	wsrv service.IServiceWisdom
+}
+
+// GetWisdomByCond 按条件查询wisdom
+func (app *WisdomApp) GetWisdomByCond(ctx context.Context, qryCond *entity.WisdomQryCond) (*entity.Wisdom, error) {
+	pageLimit := &entity.PageLimit{
+		Page:     1,
+		PageSize: 1,
+	}
+	wisdoms, err := app.wsrv.GetWisdoms(ctx, qryCond, pageLimit)
+	if err != nil {
+		return nil, err
+	}
+	if len(wisdoms) >= 1 {
+		return wisdoms[0], nil
+	}
+
+	return nil, errors.New("no Wisdom found")
 }
 
 // NewWisdomApp 初始化Wisdom的APP
 func NewWisdomApp(wisdomSvr service.IServiceWisdom) *WisdomApp {
-	return &WisdomApp{wisdomSvr: wisdomSvr}
+	return &WisdomApp{wsrv: wisdomSvr}
 }
 
 // SaveOneWisdom 保存一条wisdom记录到DB中
 func (app *WisdomApp) SaveOneWisdom(ctx context.Context, wisdom *entity.Wisdom) error {
-	return app.wisdomSvr.SaveWisdoms(ctx, []*entity.Wisdom{wisdom})
+	return app.wsrv.SaveWisdoms(ctx, []*entity.Wisdom{wisdom})
 }
 
-// GetRandOneWisdom Randomly obtain and generate a famous aphorism
-func (app *WisdomApp) GetRandOneWisdom(ctx context.Context, isPreview bool) (*entity.Wisdom, error) {
+// GetRandOneWisdomFromJsonFile Randomly obtain and generate a famous aphorism
+func (app *WisdomApp) GetRandOneWisdomFromJsonFile(ctx context.Context, isPreview bool) (*entity.Wisdom, error) {
 	// 解析wisdoms.json文件
 	list, err := files.ParseJsonWisdom(conf.GetWisdomSentenceFilePath())
 	if err != nil {
