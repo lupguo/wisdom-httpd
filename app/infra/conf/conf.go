@@ -24,6 +24,11 @@ type AssetConfig struct {
 	ViewParseFiles map[string][]string `json:"view_parse_files" yaml:"view_parse_files"`
 }
 
+// Tool 工具配置
+type Tool struct {
+	RefreshToDB bool `json:"refresh_to_db" yaml:"refresh_to_db"`
+}
+
 // Config App配置
 type Config struct {
 	Root      string           `json:"root" yaml:"root"`
@@ -33,6 +38,7 @@ type Config struct {
 	Public    string           `json:"public" yaml:"public"`
 	Wisdom    *WisdomConfig    `json:"wisdom" yaml:"wisdom"`
 	DBConfig  *mysqlx.DBConfig `yaml:"db"`
+	Tool      *Tool            `json:"tool" yaml:"tool"`
 }
 
 // 系统默认配置
@@ -70,4 +76,9 @@ func GetWisdomSentenceFilePath() string {
 // GetDBConfig 从yaml获取DBConfig的配置信息
 func GetDBConfig() (*mysqlx.DBConfig, error) {
 	return cfg.DBConfig, nil
+}
+
+// GetRefreshToDBFlag true: 刷db， false: 不刷
+func GetRefreshToDBFlag() bool {
+	return cfg.Tool.RefreshToDB
 }

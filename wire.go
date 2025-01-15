@@ -21,6 +21,7 @@ var apiSet = wire.NewSet(
 var appSet = wire.NewSet(
 	wire.Bind(new(application.IAppWisdom), new(*application.WisdomApp)),
 	application.NewWisdomApp,
+	application.NewToolsApp,
 )
 
 // srv

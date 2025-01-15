@@ -1,10 +1,14 @@
 package util
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -49,6 +53,39 @@ func (c *Context) TraceId() string {
 		return v
 	}
 	return ""
+}
+
+// GetHTTPReqEntry 从Ctx获取HTTP的GET或Post参数到
+func (c *Context) GetHTTPReqEntry() (reqData []byte, err error) {
+	switch c.Request().Method {
+	case http.MethodGet:
+		qryParams := c.QueryParams()
+		if len(qryParams) == 0 {
+			return []byte(`{}`), nil
+		}
+
+		// QueryParam -> map[string]any
+		m := make(map[string]any, len(qryParams))
+		for k, _ := range qryParams {
+			m[k] = c.QueryParam(k)
+		}
+
+		urlData, err := json.Marshal(m)
+		if err != nil {
+			return nil, errors.Wrap(err, "json marshal got err")
+		}
+
+		return urlData, nil
+	case http.MethodPost:
+		body, err := io.ReadAll(c.Request().Body)
+		if err != nil {
+			return nil, errors.Wrap(err, "read HTTP request body got err")
+		}
+
+		return body, nil
+	}
+
+	return nil, errors.Errorf("invalid http method: %s", c.Request().Method)
 }
 
 // NewContext 初始化一个HTTPd UtilContext

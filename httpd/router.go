@@ -2,8 +2,6 @@ package httpd
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"net/http"
 	"time"
 
@@ -33,10 +31,14 @@ func registerRoutes(api *api.WisdomHandler) []*RouteHandler {
 		{"GET", "/", api.Index, "index.tmpl"},
 
 		// 2024.12.31
-		{"GET", "/wisdom", api.GetOneWisdom, "wisdom.tmpl"},
+		{"GET", "/wisdom", api.GetWisdom, "wisdom.tmpl"},
 
-		{"GET", "/api/wisdom", api.GetOneWisdom, ""},
+		// api
+		{"GET", "/api/wisdom", api.GetWisdom, ""},
 		{"POST", "/api/wisdom", api.SaveWisdom, ""},
+
+		// tool
+		{"GET", "/tool/refresh_to_db", api.ToolRefreshToDB, ""},
 	}
 }
 
@@ -80,7 +82,7 @@ func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err erro
 		ctx := util.NewContext(c)
 
 		// RequestBody
-		reqData, reqMap, err := getHTTPReqEntry(ctx)
+		reqData, err := ctx.GetHTTPReqEntry()
 		if err != nil {
 			return errors.Wrap(err, "getHTTPReqEntry got err")
 		}
@@ -91,9 +93,11 @@ func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err erro
 			fields := map[string]any{
 				log.FieldError:   err,
 				log.FieldElapsed: time.Since(start),
-				log.FieldReq:     shim.ToJsonString(reqMap),
+				log.FieldReq:     string(reqData),
 				log.FieldRsp:     shim.ToJsonString(rsp),
 			}
+
+			// 请求&响应打印
 			log.WithContext(ctx).WithFields(fields).Print()
 		}(ctx, start)
 
@@ -102,9 +106,6 @@ func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err erro
 		if err != nil {
 			return errors.Wrapf(err, "api handler[%s] got err", h.URI)
 		}
-
-		// header log
-		// log.InfoContextf(ctx, "header => %s ", shim.ToJsonString(ctx.Request().Header))
 
 		// Biz 结果响应
 		if c.Request().Header.Get("Content-Type") == "application/json" || h.TemplateName == "" {
@@ -115,44 +116,4 @@ func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err erro
 		}
 
 	}
-}
-
-// 获取getHTTPBodyEntry请求的信息
-func getHTTPReqEntry(ctx *util.Context) (reqData []byte, reqMap map[string]any, err error) {
-	var m map[string]any
-	switch ctx.Request().Method {
-	case http.MethodGet:
-		qryParams := ctx.QueryParams()
-		if len(qryParams) == 0 {
-			return nil, nil, nil
-		}
-
-		m = make(map[string]any, len(qryParams))
-		for k, v := range qryParams {
-			m[k] = v
-		}
-
-		mar, err := json.Marshal(m)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "json marshal got err")
-		}
-
-		return mar, m, nil
-	case http.MethodPost:
-		reqBody, err := io.ReadAll(ctx.Request().Body)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "read HTTP request body got err")
-		}
-
-		if reqBody != nil {
-			err = json.Unmarshal(reqBody, &m)
-			if err != nil {
-				return nil, nil, errors.Wrap(err, "router json unmarshal reqbody err")
-			}
-		}
-
-		return reqBody, m, nil
-	}
-
-	return nil, nil, errors.Errorf("invalid http method: %s", ctx.Request().Method)
 }

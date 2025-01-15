@@ -4,25 +4,57 @@ import (
 	"context"
 
 	"github.com/lupguo/wisdom-httpd/app/domain/entity"
+	"github.com/lupguo/wisdom-httpd/app/domain/entity/crp"
 	"github.com/lupguo/wisdom-httpd/app/domain/repos"
+	"github.com/lupguo/wisdom-httpd/app/infra/conf"
+	"github.com/lupguo/wisdom-httpd/app/infra/files"
 	"github.com/pkg/errors"
 )
 
 // IServiceWisdom 领域服务要提供哪些能
 type IServiceWisdom interface {
-	// GetOneRandomWisdom 获取随机一条Wisdom
-	// GetOneRandomWisdom(ctx context.Context) (*entity.Wisdom, error)
-
 	// GetWisdoms 按条件获取一批Wisdoms
 	GetWisdoms(ctx context.Context, qryCond *entity.WisdomQryCond, pageLimit *entity.PageLimit) ([]*entity.Wisdom, error)
 
 	// SaveWisdoms 生成Wisdom信息，存储到DB中
 	SaveWisdoms(ctx context.Context, wisdoms []*entity.Wisdom) error
+
+	// GetWisdomsFromFiles 从Files解析Json
+	GetWisdomsFromFiles(ctx context.Context) ([]*entity.Wisdom, error)
 }
 
 // WisdomService Wisdom服务依赖的基础设施仓储接口
 type WisdomService struct {
 	dbsInfra repos.IReposWisdomDB
+}
+
+// GetWisdomsFromFiles 从文件解析得到Wisdom服务
+func (w *WisdomService) GetWisdomsFromFiles(ctx context.Context) ([]*entity.Wisdom, error) {
+	// 解析wisdoms.json文件
+	data, err := files.ParseJsonWisdom(conf.GetWisdomSentenceFilePath())
+	if err != nil {
+		return nil, errors.Wrap(err, "wisdom handler got err")
+	}
+
+	// 从json文件获取指定的内容
+	sentences := data.Sentences
+	if len(sentences) <= 0 {
+		return nil, errors.New("empty sentences")
+	}
+
+	// 获取所有的wisdom内容
+	var wisdoms []*entity.Wisdom
+	for _, s := range sentences {
+		wisdom, err := entity.NewWisdom(&crp.SaveWisdomReq{
+			Sentence: s,
+		})
+		if err != nil {
+			return nil, err
+		}
+		wisdoms = append(wisdoms, wisdom)
+	}
+
+	return wisdoms, nil
 }
 
 // NewWisdomService 初始化WisdomService

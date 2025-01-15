@@ -11,7 +11,7 @@
         "build-prod": "npx webpack --mode production",
         "build-dev": "npx webpack --mode development ",
         "watch": "npx webpack serve --open --mode development",
-        "start": "go run main.go -c ./config.yaml"
+        "start": "go run . -c ./config.yaml"
     },
     "keywords": [],
     "author": "",

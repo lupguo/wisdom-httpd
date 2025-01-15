@@ -6,7 +6,24 @@ import (
 
 // GetOneWisdomReq 请求参数
 type GetOneWisdomReq struct {
-	Preview bool `json:"preview"`
+	No       string `json:"no,omitempty"`       // 格言的No
+	Keywords string `json:"keywords,omitempty"` // 格言的部分文字
+	Speaker  string `json:"speaker,omitempty"`  // 格言者
+	Random   string `json:"random,omitempty"`   // 是否随机
+}
+
+// IsRandom 是否随机
+func (r *GetOneWisdomReq) IsRandom() bool {
+	return r.Random == "true" || r.Random == "1"
+}
+
+// GetNos 获取格言Nos
+func (r *GetOneWisdomReq) GetNos() []string {
+	var ss []string
+	if r.No != "" {
+		ss = append(ss, r.No)
+	}
+	return ss
 }
 
 // GetOneWisdomRsp 请求响应
@@ -34,4 +51,8 @@ func (s *SaveWisdomReq) Validate() error {
 	return nil
 }
 
-type SaveWisdomRsp struct{}
+// SaveWisdomRsp 保存wisdom rsp响应格式
+type SaveWisdomRsp struct {
+	Code     string `json:"code"`
+	Sentence string `json:"sentence,omitempty"` // 名言句子
+}

@@ -15,3 +15,6 @@ cross-compile:
 
 update:
 	go get -u
+
+run:
+	go run . -c ./config.yaml

@@ -38,7 +38,8 @@ const (
 
 // FieldSort 排序字段
 var FieldSort = []string{
-	FieldLevel, FieldTime, FieldTraceId, FieldSrcAddr, FieldDstAddr, FieldMethod, FieldPath, FieldElapsed,
+	FieldElapsed, FieldLevel, FieldTime,
+	FieldTraceId, FieldSrcAddr, FieldDstAddr, FieldMethod, FieldPath,
 	FieldFile, FieldReq, FieldRsp,
 	FieldMsg, FieldError,
 }
@@ -104,7 +105,7 @@ func (l *SrvLogger) WithContext(ctx context.Context) *logrus.Entry {
 	utilCtx := ctx.(*util.Context)
 
 	// 日志点
-	_, file, line, ok := runtime.Caller(3)
+	_, file, line, ok := runtime.Caller(2)
 	if !ok {
 		file = "???"
 		line = 0
