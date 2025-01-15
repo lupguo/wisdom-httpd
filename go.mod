@@ -7,7 +7,7 @@ require (
 	github.com/google/wire v0.6.0
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/labstack/gommon v0.4.2
-	github.com/lupguo/go-shim v0.1.1
+	github.com/lupguo/go-shim v0.1.2-0.20250115124756-83f7adfe95a1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/pflag v1.0.5
@@ -31,4 +31,4 @@ require (
 	gorm.io/driver/mysql v1.5.7 // indirect
 )
 
-replace github.com/lupguo/go-shim => /private/data/projects/github.com/lupguo/go-shim
+//replace github.com/lupguo/go-shim => /private/data/projects/github.com/lupguo/go-shim
