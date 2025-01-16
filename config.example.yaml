@@ -21,8 +21,8 @@ wisdom:
   refresh_interval: 30s
 db:
   dsn: ""  # [user[:password]@][net[(addr)]]/dbname[?param1=value1&paramN=valueN]
-  conn_max_lifetime: 300
-  conn_max_idle_time: 300
+  conn_max_lifetime: 300s
+  conn_max_idle_time: 300s
   max_idle_conns: 10
   max_open_conns: 50
   logger_config:
@@ -30,4 +30,5 @@ db:
     log_level: 4
     slow_threshold: "200ms"
     colorful: false
-
+tool:
+  refresh_to_db: false
