@@ -1,8 +1,5 @@
-declare module NodeJS {
-    interface Module {
-        hot?: {
-            accept: (path?: string, callback?: () => void) => void;
-            dispose: (callback: () => void) => void;
-        };
-    }
-}
+declare module '*.jpg';
+declare module '*.png';
+declare module '*.gif';
+declare module '*.svg';
+declare module '*.css';

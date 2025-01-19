@@ -4,4 +4,4 @@ public/
 node_modules
 wisdom-httpd
 /assets/dist/
-dist
+#dist

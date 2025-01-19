@@ -29,6 +29,9 @@ func NewHttpdServer(cfg *conf.Config, apiHandler *api.WisdomHandler) (*HttpdServ
 	e.HideBanner = true
 	e.Renderer = render
 
+	// Echo中间件
+	InitMiddlewareConfig(e)
+
 	// 路由器配置，通过依赖注入方式实现
 	router, err := RegisterRouterHandler(e, apiHandler)
 	if err != nil {

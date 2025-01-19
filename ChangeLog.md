@@ -1,5 +1,16 @@
 # ChangeLog
 
+## 2025/1/19
+
+[x] 基于Caddy部署 `wisdom-httpd` 服务，支持每30s更换一次wisdom内容
+[x] 创建一个`Cron`定时任务，支持定期备份到指定目录
+[x] 开发`PopClip插件`，支持通过PopClip请求`/api/save`保存信息
+
+## 2025/1/17
+
+1. `webpack.config.js`重新配置，参考前后端分离方案，让Go渲染`wisdom.tmpl`模版时候，仅用包含`main.js`即可
+2. wisdom-http服务响应，支持`CORS`处理
+
 ## 2025/1/15
 
 1. Web日志、DB日志规范和重构

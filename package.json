@@ -8,10 +8,11 @@
     },
     "scripts": {
         "build": "webpack",
+        "start": "webpack serve --open",
+        "watch": "npx webpack serve --open --mode development",
         "build-prod": "npx webpack --mode production",
         "build-dev": "npx webpack --mode development ",
-        "watch": "npx webpack serve --open --mode development",
-        "start": "go run . -c ./config.yaml"
+        "backend": "go run . -c ./config.yaml"
     },
     "keywords": [],
     "author": "",
@@ -19,16 +20,17 @@
     "devDependencies": {
         "css-loader": "^7.1.2",
         "file-loader": "^6.2.0",
-        "html-webpack-plugin": "^5.6.0",
+        "html-webpack-plugin": "^5.6.3",
         "mini-css-extract-plugin": "^2.9.2",
         "style-loader": "^4.0.0",
-        "ts-loader": "^9.5.1",
+        "terser-webpack-plugin": "^5.3.11",
+        "ts-loader": "^9.5.2",
+        "typescript": "^5.7.3",
         "webpack": "^5.97.1",
         "webpack-cli": "^5.1.4",
         "webpack-dev-server": "^5.2.0"
     },
     "dependencies": {
-        "copy-webpack-plugin": "^12.0.2",
-        "terser-webpack-plugin": "^5.3.11"
+        "copy-webpack-plugin": "^12.0.2"
     }
 }

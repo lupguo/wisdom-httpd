@@ -25,6 +25,12 @@ type RouteHandler struct {
 	TemplateName  string        // 路由模版，纯JSON可以忽略
 }
 
+// Router Web路由
+type Router struct {
+	RouteHandlers []*RouteHandler
+	echo          *echo.Echo
+}
+
 // registerRoutes 路由配置，通过apiImpl实例注入
 func registerRoutes(api *api.WisdomHandler) []*RouteHandler {
 	return []*RouteHandler{
@@ -49,34 +55,19 @@ func RegisterRouterHandler(echo *echo.Echo, apiImpl *api.WisdomHandler) (*Router
 		RouteHandlers: registerRoutes(apiImpl),
 	}
 
-	if err := r.build(); err != nil {
-		return nil, errors.Wrap(err, "build router got err")
+	// 静态路由
+	echo.Static("/static", conf.PublicPath())
+
+	// 动态路由
+	for _, h := range r.RouteHandlers {
+		r.echo.Router().Add(h.Method, h.URI, warpToEchoHandle(h))
 	}
 
 	return r, nil
 }
 
-// Router Web路由
-type Router struct {
-	RouteHandlers []*RouteHandler
-	echo          *echo.Echo
-}
-
-// build 处理路由注册
-func (r *Router) build() error {
-	// 静态路由
-	r.echo.Static("/dist", conf.PublicPath())
-
-	// 动态路由
-	for _, h := range r.RouteHandlers {
-		r.echo.Router().Add(h.Method, h.URI, warpRouteHandleToEchoHandle(h))
-	}
-
-	return nil
-}
-
 // 通过注入RouteHandle
-func warpRouteHandleToEchoHandle(h *RouteHandler) func(c echo.Context) (err error) {
+func warpToEchoHandle(h *RouteHandler) func(c echo.Context) (err error) {
 	return func(c echo.Context) (err error) {
 		start := time.Now()
 		ctx := util.NewContext(c)

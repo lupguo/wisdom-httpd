@@ -1,27 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script type="application/javascript" src="http://localhost:3000/dist/bundle.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wisdom</title>
 </head>
 <body>
 <div class="container">
-
-    <!-- 导航栏内容 -->
-    <div class="header">
-        {{include "main/header.tmpl" .}}
-    </div>
-
-    <!-- 主内容区域 -->
     <div class="content">
         {{include "main/content.tmpl" .}}
     </div>
-
-    <!-- 底部信息 -->
-    <div class="footer">
-        {{include "main/footer.tmpl" .}}
-    </div>
 </div>
-
 </body>
 </html>
