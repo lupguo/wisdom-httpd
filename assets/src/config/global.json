@@ -6,5 +6,5 @@
         "GetRandomWisdom": "/api/wisdom?random=1",
         "SaveWisdom": "/api/wisdom"
     },
-    "REFRESH_INTERVAL": 3000
+    "REFRESH_INTERVAL": 30000
 }
