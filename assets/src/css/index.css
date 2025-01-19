@@ -18,7 +18,7 @@
 }
 
 .footer {
-    background-color: #f0f0f0;
+    background-color: #e4cece;
     padding: 20px;
     /* 底部信息样式 */
 }
@@ -30,7 +30,8 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background-color: lightblue;
+    font-family: sans-serif;
+    font-weight: 200;
 }
 
 h1 {

@@ -1,20 +1,12 @@
-# 定义目标为编译可执行文件
-build:
-	go build -v -o wisdom-httpd .
+# 方便Rocky-Linux机器快速代码更新和部署
+install-rocky-linux:
+	# 1. 代码更新
+	git pull
 
-install:
+	# 2. 编译安装
+	ls -al /data/go/bin/wisdom-httpd
 	go install -v .
+	ls -al /data/go/bin/wisdom-httpd
 
-# 定义目标为清理生成的可执行文件
-clean:
-	rm -f wisdom-httpd
-
-# 定义目标为交叉编译 Linux 和 Windows 版本
-cross-compile:
-	GOOS=linux GOARCH=amd64 go build -o wisdom-httpd-linux-amd64 .
-
-update:
-	go get -u
-
-run:
-	go run . -c ./config.yaml
+	# 3. 服务重启
+	systemctl restart wisdom-httpd.service
