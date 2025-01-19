@@ -28,15 +28,8 @@ func NewWisdomHandlerImpl(wisdomApp application.IAppWisdom, toolApp *application
 
 // Index 首页渲染
 func (h *WisdomHandler) Index(ctx context.Context, req []byte) (rsp any, err error) {
-	wisdom, err := h.wisdomApp.GetRandOneWisdomFromJsonFile(nil, false)
-	if err != nil {
-		return nil, err
-	}
-
-	rsp = &crp.PageDataIndexRsp{
-		User:    &crp.User{Name: "Rod"},
-		Wisdom:  wisdom.Sentence,
-		Content: "wisdom page index content",
+	rsp = &crp.RspBody{
+		Data: `Welcome to Wisdom API!`,
 	}
 
 	return rsp, nil

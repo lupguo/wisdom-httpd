@@ -5,5 +5,5 @@ type ReqBody struct {
 }
 
 type RspBody struct {
-	Data string `json:"data"`
+	Data any `json:"data"`
 }

@@ -1,0 +1,10 @@
+{
+    "HOST": {
+        "Wisdom": "http://127.0.0.1:1666"
+    },
+    "URI": {
+        "GetRandomWisdom": "/api/wisdom?random=1",
+        "SaveWisdom": "/api/wisdom"
+    },
+    "REFRESH_INTERVAL": 3000
+}

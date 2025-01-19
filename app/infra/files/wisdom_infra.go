@@ -12,7 +12,7 @@ import (
 func ParseJsonWisdom(filename string) (*entity.WisdomFileData, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, errors.Wrap(err, "read file `wisdomHandler.json` got err")
+		return nil, errors.Wrapf(err, "read file `%s` got err", filename)
 	}
 
 	var ws entity.WisdomFileData
