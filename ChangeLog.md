@@ -1,9 +1,11 @@
 # ChangeLog
 
 ## 2025/1/20
+
 [x] 优化Webpack，支持执行`package.json`中`script`命令实现不同环境配置前端项目构建 -> 👍
 [x] 本地基于Nginx配置快速部署
-[ ] 开发`PopClip插件`，支持通过PopClip请求`/api/save`保存信息
+[x] 开发`PopClip插件`，支持通过PopClip请求`/api/save`保存信息
+[x] 优化下`/api/save`接口，支持UUID密钥限制，防止被人恶意Post信息
 
 ## 2025/1/19
 

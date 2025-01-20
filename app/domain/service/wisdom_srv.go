@@ -29,7 +29,7 @@ type WisdomService struct {
 }
 
 // GetWisdomsFromFiles 从文件解析得到Wisdom服务
-func (w *WisdomService) GetWisdomsFromFiles(ctx context.Context) ([]*entity.Wisdom, error) {
+func (w *WisdomService) GetWisdomsFromFiles(_ context.Context) ([]*entity.Wisdom, error) {
 	// 解析wisdoms.json文件
 	data, err := files.ParseJsonWisdom(conf.GetWisdomSentenceFilePath())
 	if err != nil {
@@ -47,6 +47,7 @@ func (w *WisdomService) GetWisdomsFromFiles(ctx context.Context) ([]*entity.Wisd
 	for _, s := range sentences {
 		wisdom, err := entity.NewWisdom(&crp.SaveWisdomReq{
 			Sentence: s,
+			SKey:     conf.GetSKey(),
 		})
 		if err != nil {
 			return nil, err

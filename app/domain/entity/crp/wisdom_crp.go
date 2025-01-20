@@ -1,6 +1,7 @@
 package crp
 
 import (
+	"github.com/lupguo/wisdom-httpd/app/infra/conf"
 	"github.com/pkg/errors"
 )
 
@@ -36,6 +37,7 @@ type SaveWisdomReq struct {
 	Sentence string `json:"sentence,omitempty"`  // 名言句子
 	Speaker  string `json:"speaker,omitempty"`   // 名人
 	ReferURL string `json:"refer_url,omitempty"` // 出处URL, URL Reference
+	SKey     string `json:"skey,omitempty"`      // 密钥, yaml配置
 }
 
 // Validate 请求检测
@@ -46,6 +48,9 @@ func (s *SaveWisdomReq) Validate() error {
 	}
 	if s.Sentence == "" {
 		return errors.New("Sentence is empty")
+	}
+	if s.SKey != conf.GetSKey() {
+		return errors.New("Error Secret Key")
 	}
 
 	return nil

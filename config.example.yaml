@@ -10,15 +10,14 @@ assets:
   view_path: "assets/views"
   view_parse_files:
     files:
-      - "index.tmpl"
       - "wisdom.tmpl"
     glob:
       - "main/*.tmpl"
       - "partial/*.tmpl"
 public: "./dist"
 wisdom:
+  skey: "YOUR-SKEY"
   file_path: "./wisdom.json"
-  refresh_interval: 30s
 db:
   dsn: ""  # [user[:password]@][net[(addr)]]/dbname[?param1=value1&paramN=valueN]
   conn_max_lifetime: 300s
@@ -26,7 +25,8 @@ db:
   max_idle_conns: 10
   max_open_conns: 50
   logger_config:
-    log_file: "/tmp/wisdom_app.log"
+    #    log_file: "/tmp/wisdom_app.log"
+    log_file: "console"
     log_level: 4
     slow_threshold: "200ms"
     colorful: false
