@@ -34,10 +34,7 @@ type Router struct {
 // registerRoutes 路由配置，通过apiImpl实例注入
 func registerRoutes(api *api.WisdomHandler) []*RouteHandler {
 	return []*RouteHandler{
-		{"GET", "/", api.Index, "index.tmpl"},
-
-		// 2024.12.31
-		{"GET", "/wisdom", api.GetWisdom, "wisdom.tmpl"},
+		{"GET", "/", api.GetWisdom, "wisdom.tmpl"},
 
 		// api
 		{"GET", "/api/wisdom", api.GetWisdom, ""},

@@ -1,10 +1,14 @@
 # ChangeLog
 
+## 2025/1/20
+[x] 优化Webpack，支持执行`package.json`中`script`命令实现不同环境配置前端项目构建 -> 👍
+[x] 本地基于Nginx配置快速部署
+[ ] 开发`PopClip插件`，支持通过PopClip请求`/api/save`保存信息
+
 ## 2025/1/19
 
 [x] 基于Caddy部署 `wisdom-httpd` 服务，支持每30s更换一次wisdom内容
 [x] 创建一个`Cron`定时任务，支持定期备份到指定目录
-[x] 开发`PopClip插件`，支持通过PopClip请求`/api/save`保存信息
 
 ## 2025/1/17
 

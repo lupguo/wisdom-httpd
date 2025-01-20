@@ -1,0 +1,10 @@
+{
+    "HOST": {
+        "Wisdom": "//wisdom.archstat.cc"
+    },
+    "URI": {
+        "GetRandomWisdom": "/api/wisdom?random=1",
+        "SaveWisdom": "/api/wisdom"
+    },
+    "REFRESH_INTERVAL": 3000
+}
