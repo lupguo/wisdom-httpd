@@ -38,7 +38,7 @@ const (
 
 // FieldSort 排序字段
 var FieldSort = []string{
-	FieldElapsed, FieldLevel, FieldTime,
+	FieldTime, FieldElapsed, FieldLevel,
 	FieldTraceId, FieldSrcAddr, FieldDstAddr, FieldMethod, FieldPath,
 	FieldFile, FieldReq, FieldRsp,
 	FieldMsg, FieldError,

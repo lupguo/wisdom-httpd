@@ -7,12 +7,10 @@
         "test": "test"
     },
     "scripts": {
-        "build": "webpack",
-        "start": "webpack serve --open",
-        "watch": "npx webpack serve --open --mode development",
-        "build-prod": "npx webpack --mode production",
-        "build-dev": "npx webpack --mode development ",
-        "backend": "go run . -c ./config.yaml"
+        "watch-dev": "npx webpack serve --open --mode development",
+        "build-dev": "npx webpack --mode development",
+        "backend-dev": "go run . -c ./config.yaml",
+        "build-prod": "npx webpack --mode production"
     },
     "keywords": [],
     "author": "",

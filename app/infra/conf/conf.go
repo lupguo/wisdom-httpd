@@ -3,7 +3,6 @@ package conf
 import (
 	"os"
 	"path"
-	"time"
 
 	"github.com/lupguo/go-shim/shim"
 	"github.com/lupguo/go-shim/x/mysqlx"
@@ -14,8 +13,8 @@ import (
 
 // WisdomConfig wisdom.json文件配置
 type WisdomConfig struct {
-	FilePath        string        `json:"file_path" yaml:"file_path"`
-	RefreshInterval time.Duration `json:"refresh_interval" yaml:"refresh_interval"`
+	FilePath string `json:"file_path" yaml:"file_path"`
+	SKey     string `json:"skey" yaml:"skey"`
 }
 
 // AssetConfig 视图路径配置
@@ -81,4 +80,9 @@ func GetDBConfig() (*mysqlx.DBConfig, error) {
 // GetRefreshToDBFlag true: 刷db， false: 不刷
 func GetRefreshToDBFlag() bool {
 	return cfg.Tool.RefreshToDB
+}
+
+// GetSKey 获取Yaml配置的密钥
+func GetSKey() string {
+	return cfg.Wisdom.SKey
 }

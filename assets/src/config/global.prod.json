@@ -1,6 +1,6 @@
 {
     "HOST": {
-        "Wisdom": "http://127.0.0.1:1666"
+        "Wisdom": "//wisdom.archstat.com"
     },
     "URI": {
         "GetRandomWisdom": "/api/wisdom?random=1",

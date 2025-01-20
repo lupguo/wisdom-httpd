@@ -1,5 +1,3 @@
-import global from './config/global.json'; // 使用 TypeScript 的 JSON 导入功能
-
 // 定义 URI 类型，使用索引签名
 interface URI {
     [key: string]: string; // 允许任意字符串键，值为字符串
@@ -17,7 +15,7 @@ interface Config {
 }
 
 // JSON 数据
-export const config: Config = global
+export const config: Config = require('./config/' + process.env.CONFIG_FILE);
 console.log("global config: " + config)
 
 // 获取指定的URI

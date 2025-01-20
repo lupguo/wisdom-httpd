@@ -2,6 +2,7 @@ package httpd
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -34,10 +35,7 @@ type Router struct {
 // registerRoutes 路由配置，通过apiImpl实例注入
 func registerRoutes(api *api.WisdomHandler) []*RouteHandler {
 	return []*RouteHandler{
-		{"GET", "/", api.Index, "index.tmpl"},
-
-		// 2024.12.31
-		{"GET", "/wisdom", api.GetWisdom, "wisdom.tmpl"},
+		{"GET", "/", api.GetWisdom, "wisdom.tmpl"},
 
 		// api
 		{"GET", "/api/wisdom", api.GetWisdom, ""},
@@ -81,10 +79,13 @@ func warpToEchoHandle(h *RouteHandler) func(c echo.Context) (err error) {
 		// Biz 请求+响应日志打印
 		var rsp any
 		defer func(c *util.Context, start time.Time) {
+			var reqMapData map[string]any
+			_ = json.Unmarshal(reqData, &reqMapData)
+
 			fields := map[string]any{
 				log.FieldError:   err,
 				log.FieldElapsed: time.Since(start),
-				log.FieldReq:     string(reqData),
+				log.FieldReq:     shim.ToJsonString(reqMapData),
 				log.FieldRsp:     shim.ToJsonString(rsp),
 			}
 
@@ -95,7 +96,8 @@ func warpToEchoHandle(h *RouteHandler) func(c echo.Context) (err error) {
 		// Biz 处理
 		rsp, err = h.APIHandleFunc(ctx, reqData)
 		if err != nil {
-			return errors.Wrapf(err, "api handler[%s] got err", h.URI)
+			wrapErr := errors.Wrapf(err, "api handler[%s] got err", h.URI)
+			return echo.NewHTTPError(http.StatusInternalServerError, wrapErr)
 		}
 
 		// Biz 结果响应

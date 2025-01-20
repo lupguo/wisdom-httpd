@@ -26,15 +26,6 @@ func NewWisdomHandlerImpl(wisdomApp application.IAppWisdom, toolApp *application
 	}
 }
 
-// Index 首页渲染
-func (h *WisdomHandler) Index(ctx context.Context, req []byte) (rsp any, err error) {
-	rsp = &crp.RspBody{
-		Data: `Welcome to Wisdom API!`,
-	}
-
-	return rsp, nil
-}
-
 // GetWisdom 通过序号获取wisdom信息
 func (h *WisdomHandler) GetWisdom(ctx context.Context, reqData []byte) (rsp any, err error) {
 	req := &crp.GetOneWisdomReq{}
