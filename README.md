@@ -2,6 +2,8 @@
 
 wisdom-httpd是一个提供人生至理名言、冥想开悟的小工具，激励我们在人生苦短的时代，无论遇到什么挫折，都应该积极、努力的追求人生的价值和意义！
 
+Website: https://wisdom.archstat.com
+
 ## How To
 
 ### 服务编译
