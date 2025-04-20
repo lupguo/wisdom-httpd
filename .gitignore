@@ -5,3 +5,4 @@ node_modules
 wisdom-httpd
 /assets/dist/
 /dist/dev
+.DS_Store
