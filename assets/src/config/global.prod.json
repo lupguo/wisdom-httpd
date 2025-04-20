@@ -1,6 +1,6 @@
 {
     "HOST": {
-        "Wisdom": "//wisdom.archstat.com"
+        "Wisdom": "//wisdom.sapaude.tech"
     },
     "URI": {
         "GetRandomWisdom": "/api/wisdom?random=1",

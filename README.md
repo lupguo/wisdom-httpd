@@ -2,6 +2,8 @@
 
 wisdom-httpd是一个提供人生至理名言、冥想开悟的小工具，激励我们在人生苦短的时代，无论遇到什么挫折，都应该积极、努力的追求人生的价值和意义！
 
+Website: https://wisdom.archstat.com
+
 ## How To
 
 ### 服务编译
@@ -54,7 +56,58 @@ curl localhost:1666/wisdom?type=json
 {"sentence":"We dream and we build. We never give up, we never quit. 我们梦想，我们努力，决不放弃，决不退缩"}✔ /data/proje 
 ```
 
-### Nginx配置
+### Web配置
+
+#### Caddy
+
+`wisdom.archstat.com.caddyfile`配置文件：
+
+```sh
+$ cat /etc/caddy/Caddyfile.d/wisdom.archstat.com.caddyfile
+wisdom.archstat.com {
+    # 静态资源配置
+    root * /data/projects/github.com/lupguo/wisdom-httpd/dist/prod
+    file_server {
+        index index.html
+    }
+
+    # API 代理配置
+    reverse_proxy /api/* 127.0.0.1:1666 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+    }
+
+}
+```
+
+**Systemd服务配置**: 
+
+```
+[Unit]
+Description=Caddy web server
+Documentation=https://caddyserver.com/docs/
+After=network.target
+
+[Service]
+Type=notify
+User=caddy
+Group=caddy
+ExecStartPre=/usr/bin/caddy validate --config /etc/caddy/Caddyfile
+ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/Caddyfile
+ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
+```
+
+#### Nginx(可选）
 
 ```
 server {
